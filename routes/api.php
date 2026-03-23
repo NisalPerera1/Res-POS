@@ -5,6 +5,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PaymentController;   // ← ADD THIS
 
 // Health check
 Route::get('/health', fn() => response()->json(['status' => 'ok', 'timestamp' => now()]));
@@ -16,32 +17,32 @@ Route::get('/users/list',  [UserController::class, 'listUsers']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
-// ── Menu ──────────────────────────────────────────────────
-Route::get('/menu',                                  [MenuController::class, 'fullMenu']);
-Route::get('/menu/categories',                       [MenuController::class, 'categories']);
-Route::post('/menu/categories',                      [MenuController::class, 'storeCategory']);
-Route::put('/menu/categories/{id}',                  [MenuController::class, 'updateCategory']);
-Route::delete('/menu/categories/{id}',               [MenuController::class, 'destroyCategory']);
+    // ── Menu ──────────────────────────────────────────────────
+    Route::get('/menu',                                  [MenuController::class, 'fullMenu']);
+    Route::get('/menu/categories',                       [MenuController::class, 'categories']);
+    Route::post('/menu/categories',                      [MenuController::class, 'storeCategory']);
+    Route::put('/menu/categories/{id}',                  [MenuController::class, 'updateCategory']);
+    Route::delete('/menu/categories/{id}',               [MenuController::class, 'destroyCategory']);
 
-Route::get('/menu/items',                            [MenuController::class, 'items']);
-Route::get('/menu/items/{id}',                       [MenuController::class, 'showItem']);
-Route::post('/menu/items',                           [MenuController::class, 'storeItem']);
-Route::put('/menu/items/{id}',                       [MenuController::class, 'updateItem']);
-Route::delete('/menu/items/{id}',                    [MenuController::class, 'destroyItem']);
-Route::patch('/menu/items/{id}/toggle-availability', [MenuController::class, 'toggleAvailability']);
-Route::patch('/menu/items/{id}/toggle',              [MenuController::class, 'toggleAvailability']);
+    Route::get('/menu/items',                            [MenuController::class, 'items']);
+    Route::get('/menu/items/{id}',                       [MenuController::class, 'showItem']);
+    Route::post('/menu/items',                           [MenuController::class, 'storeItem']);
+    Route::put('/menu/items/{id}',                       [MenuController::class, 'updateItem']);
+    Route::delete('/menu/items/{id}',                    [MenuController::class, 'destroyItem']);
+    Route::patch('/menu/items/{id}/toggle-availability', [MenuController::class, 'toggleAvailability']);
+    Route::patch('/menu/items/{id}/toggle',              [MenuController::class, 'toggleAvailability']);
 
-// ── Modifier Groups ────────────────────────────────────────
-Route::get('/modifier-groups',                       [MenuController::class, 'modifierGroups']);
-Route::get('/modifier-groups/{id}',                  [MenuController::class, 'showModifierGroup']);
-Route::post('/modifier-groups',                      [MenuController::class, 'storeModifierGroup']);
-Route::put('/modifier-groups/{id}',                  [MenuController::class, 'updateModifierGroup']);
-Route::delete('/modifier-groups/{id}',               [MenuController::class, 'destroyModifierGroup']);
+    // ── Modifier Groups ────────────────────────────────────────
+    Route::get('/modifier-groups',                       [MenuController::class, 'modifierGroups']);
+    Route::get('/modifier-groups/{id}',                  [MenuController::class, 'showModifierGroup']);
+    Route::post('/modifier-groups',                      [MenuController::class, 'storeModifierGroup']);
+    Route::put('/modifier-groups/{id}',                  [MenuController::class, 'updateModifierGroup']);
+    Route::delete('/modifier-groups/{id}',               [MenuController::class, 'destroyModifierGroup']);
 
-// ── Modifiers ──────────────────────────────────────────────
-Route::post('/modifiers',                            [MenuController::class, 'storeModifier']);
-Route::put('/modifiers/{id}',                        [MenuController::class, 'updateModifier']);
-Route::delete('/modifiers/{id}',                     [MenuController::class, 'destroyModifier']);
+    // ── Modifiers ──────────────────────────────────────────────
+    Route::post('/modifiers',                            [MenuController::class, 'storeModifier']);
+    Route::put('/modifiers/{id}',                        [MenuController::class, 'updateModifier']);
+    Route::delete('/modifiers/{id}',                     [MenuController::class, 'destroyModifier']);
 
     // ── Tables ────────────────────────────────────────────
     Route::get('/tables',        [TableController::class, 'index']);
@@ -83,7 +84,11 @@ Route::delete('/modifiers/{id}',                     [MenuController::class, 'de
     Route::delete('/modifiers/{id}',        [MenuController::class, 'destroyModifier']);
         
         
-    
-    
+    // Payments
+Route::post('/orders/{id}/payments',  [PaymentController::class, 'processPayment']);
+Route::get('/orders/{id}/receipt',    [PaymentController::class, 'receipt']);
+Route::get('/payments',               [PaymentController::class, 'index']);
+Route::get('/payments/summary',       [PaymentController::class, 'summary']);
+    Route::patch('/orders/{id}/service-charge', [OrderController::class, 'updateServiceCharge']);
     
     });

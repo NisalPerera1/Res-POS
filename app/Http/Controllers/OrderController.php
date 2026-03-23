@@ -508,4 +508,32 @@ public function storeDirect(Request $request)
             'payments',
         ])->findOrFail($orderId);
     }
+
+
+/**
+ * PATCH /api/orders/{id}/service-charge
+ * Update or remove service charge before payment
+ */
+public function updateServiceCharge(Request $request, $id)
+{
+    $request->validate([
+        'tax_rate' => 'required|numeric|min:0|max:100',
+    ]);
+
+    $order = Order::findOrFail($id);
+
+    $taxRate   = (float) $request->tax_rate;
+    $taxAmount = round($order->subtotal * ($taxRate / 100), 2);
+    $total     = round($order->subtotal + $taxAmount - $order->discount_amount, 2);
+
+    $order->update([
+        'tax_rate'   => $taxRate,
+        'tax_amount' => $taxAmount,
+        'total'      => $total,
+    ]);
+
+    return response()->json($this->orderWithItems($id));
+}
+
+
 }
