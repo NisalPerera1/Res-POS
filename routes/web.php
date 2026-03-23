@@ -10,3 +10,5 @@ Route::get('/', function () {
 Route::get('/{path?}', function () {
     return view('pos.index');
 })->where('path', '.*');
+
+Route::get('/{any}', fn() => view('app'))->where('any', '.*');

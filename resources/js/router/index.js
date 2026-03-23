@@ -13,12 +13,36 @@ const routes = [
     component: () => import('@/layouts/AppLayout.vue'),
     meta: { requiresAuth: true },
     children: [
-      { path: '',          name: 'tables',  component: () => import('@/views/TableView.vue') },
-      { path: 'pos/:tableId', name: 'pos', component: () => import('@/views/POSScreen.vue') },
-      { path: 'pos/direct/:orderId', name: 'direct-pos', component: () => import('@/views/POSScreen.vue') },
-      { path: 'kitchen',   name: 'kitchen', component: () => import('@/views/KitchenDisplay.vue') },
-      { path: 'menu',      name: 'menu',    component: () => import('@/views/MenuManager.vue') },
-      { path: 'reports',   name: 'reports', component: () => import('@/views/Reports.vue') },
+      {
+        path: '',
+        name: 'tables',
+        component: () => import('@/views/TableView.vue'),
+      },
+      {
+        path: 'pos/:tableId',
+        name: 'pos',
+        component: () => import('@/views/POSScreen.vue'),
+      },
+      {
+        path: 'kitchen',
+        name: 'kitchen',
+        component: () => import('@/views/KitchenDisplay.vue'),
+      },
+      {
+        path: 'direct',
+        name: 'direct-order',
+        component: () => import('@/views/DirectOrder.vue'),
+      },
+      {
+        path: 'menu',
+        name: 'menu',
+        component: () => import('@/views/MenuManager.vue'),
+      },
+      {
+        path: 'reports',
+        name: 'reports',
+        component: () => import('@/views/Reports.vue'),
+      },
     ],
   },
 ]
@@ -30,7 +54,6 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
-
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
     next('/login')
   } else if (to.meta.guest && auth.isLoggedIn) {

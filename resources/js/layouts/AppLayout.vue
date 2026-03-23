@@ -15,7 +15,9 @@
 
       <!-- Nav buttons -->
       <NavBtn to="/"        icon="grid"      label="Tables"  />
+      <NavBtn to="/direct" icon="arrow"      label="direct" />
       <NavBtn to="/kitchen" icon="chef"      label="Kitchen" />
+
       <NavBtn to="/menu"    icon="menu"      label="Menu"    v-if="auth.isAdmin" />
       <NavBtn to="/reports" icon="chart"     label="Reports" v-if="auth.isAdmin" />
 

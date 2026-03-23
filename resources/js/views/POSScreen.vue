@@ -165,6 +165,18 @@
                                 white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                       {{ item.item_name }}
                     </div>
+                    <!-- Modifier pills on sent items -->
+<div v-if="item.modifiers && item.modifiers.length > 0"
+  style="display:flex; flex-wrap:wrap; gap:3px; margin-top:3px;">
+  <span
+    v-for="mod in item.modifiers" :key="mod.id"
+    style="font-size:9px; padding:1px 6px; border-radius:4px;
+           background:rgba(100,116,139,0.12); color:#64748B; font-weight:500;"
+  >
+    {{ mod.name }}
+    <span v-if="mod.price > 0" style="color:#F59E0B;">+${{ parseFloat(mod.price).toFixed(2) }}</span>
+  </span>
+</div>
                     <div v-if="item.notes"
                       style="font-size:10px; color:#64748B; margin-top:1px;">
                       📝 {{ item.notes }}
@@ -425,7 +437,13 @@
         {{ toast.type === 'success' ? '✅' : '⚠️' }} {{ toast.message }}
       </div>
     </Teleport>
-
+<!-- Modifier Selector Modal -->
+<ModifierSelector
+  v-if="modifierItem"
+  :item="modifierItem"
+  @confirm="onModifierConfirm"
+  @cancel="modifierItem = null"
+/>
   </div>
 </template>
 
@@ -436,6 +454,7 @@ import { useOrderStore }                         from '@/stores/orders'
 import { useMenuStore }                          from '@/stores/menu'
 import axios                                     from 'axios'
 import PaymentModal                              from '@/components/PaymentModal.vue'
+import ModifierSelector from '@/components/ModifierSelector.vue'
 
 const route      = useRoute()
 const router     = useRouter()
@@ -450,6 +469,7 @@ const showPayment  = ref(false)
 const notesItem    = ref(null)
 const notesText    = ref('')
 const toast        = ref({ show: false, message: '', type: 'success' })
+const modifierItem = ref(null)  // item waiting for modifier selection
 
 // ── Computed ──────────────────────────────────────────────
 const currentOrder = computed(() => orderStore.currentOrder)
@@ -531,8 +551,18 @@ function statusLabel(status) {
 // ── Cart actions ──────────────────────────────────────────
 async function addItem(menuItem) {
   if (!currentOrder.value || !menuItem.is_available) return
+
+  // Check if item has modifier groups
+  const hasModifiers = menuItem.modifier_groups && menuItem.modifier_groups.length > 0
+
+  if (hasModifiers) {
+    // Open modifier selector
+    modifierItem.value = menuItem
+    return
+  }
+
+  // No modifiers — add directly
   try {
-    // Only merge with unsent items (no kot_round)
     const existing = orderItems.value.find(
       i => i.menu_item_id === menuItem.id && !i.kot_round
     )
@@ -542,6 +572,7 @@ async function addItem(menuItem) {
       await orderStore.addItem(currentOrder.value.id, {
         menu_item_id: menuItem.id,
         quantity:     1,
+        is_instant:   menuItem.is_instant,
       })
     }
   } catch (e) {
@@ -549,6 +580,21 @@ async function addItem(menuItem) {
   }
 }
 
+async function onModifierConfirm(payload) {
+  modifierItem.value = null
+  try {
+    await orderStore.addItem(currentOrder.value.id, {
+      menu_item_id:       payload.menu_item_id,
+      quantity:           payload.quantity,
+      selected_modifiers: payload.selected_modifiers,
+      notes:              payload.notes,
+      is_instant:         payload.is_instant,
+    })
+    showToast('Added to cart ✓', 'success')
+  } catch (e) {
+    showToast('Failed to add: ' + (e.response?.data?.message ?? e.message), 'error')
+  }
+}
 async function increaseQty(item) {
   try {
     await orderStore.updateItemQty(currentOrder.value.id, item.id, item.quantity + 1)

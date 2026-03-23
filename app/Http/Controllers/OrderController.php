@@ -5,6 +5,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Table;
 use App\Models\MenuItem;
+use App\Models\Modifier;         
+use App\Models\ModifierGroup;
 use App\Events\OrderStatusUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -86,55 +88,79 @@ class OrderController extends Controller
         }
     }
 
-    public function addItem(Request $request, $orderId)
-    {
-        $request->validate([
-            'menu_item_id' => 'required|exists:menu_items,id',
-            'quantity'     => 'required|integer|min:1',
-            'modifiers'    => 'nullable|array',
-            'notes'        => 'nullable|string|max:255',
-        ]);
+public function addItem(Request $request, $orderId)
+{
+    $request->validate([
+        'menu_item_id'        => 'required|exists:menu_items,id',
+        'quantity'            => 'required|integer|min:1',
+        'selected_modifiers'  => 'nullable|array',   // array of modifier IDs
+        'selected_modifiers.*'=> 'exists:modifiers,id',
+        'notes'               => 'nullable|string|max:255',
+        'is_instant'          => 'nullable|boolean',
+    ]);
 
-        $order    = Order::findOrFail($orderId);
-        $menuItem = MenuItem::findOrFail($request->menu_item_id);
+    $order    = Order::findOrFail($orderId);
+    $menuItem = MenuItem::findOrFail($request->menu_item_id);
 
-        if (!$menuItem->is_available) {
-            return response()->json(['message' => 'Item is not available'], 422);
+    if (!$menuItem->is_available) {
+        return response()->json(['message' => 'Item is not available'], 422);
+    }
+
+    $isInstant = $menuItem->is_instant || $request->boolean('is_instant');
+
+    // Build modifiers snapshot
+    $modifierCost      = 0;
+    $selectedModifiers = [];
+
+    if ($request->selected_modifiers && count($request->selected_modifiers) > 0) {
+        $modifiers = Modifier::whereIn('id', $request->selected_modifiers)
+            ->where('is_active', true)
+            ->get();
+
+        foreach ($modifiers as $mod) {
+            $modifierCost       += $mod->price;
+            $selectedModifiers[] = [
+                'id'         => $mod->id,
+                'group_id'   => $mod->modifier_group_id,
+                'group_name' => $mod->group_name,
+                'name'       => $mod->name,
+                'price'      => (float) $mod->price,
+            ];
         }
+    }
 
-        $modifierCost      = 0;
-        $selectedModifiers = [];
-        if ($request->modifiers) {
-            foreach ($request->modifiers as $modId) {
-                $modifier = \App\Models\Modifier::find($modId);
-                if ($modifier) {
-                    $modifierCost       += $modifier->price;
-                    $selectedModifiers[] = [
-                        'id'    => $modifier->id,
-                        'name'  => $modifier->name,
-                        'price' => $modifier->price,
-                    ];
-                }
-            }
-        }
+    $unitPrice  = (float) $menuItem->price + $modifierCost;
+    $totalPrice = $unitPrice * $request->quantity;
 
-        $unitPrice  = $menuItem->price + $modifierCost;
-        $totalPrice = $unitPrice * $request->quantity;
+    // Build a modifier signature for grouping
+    // Items with same menu_item + same modifiers = same line
+    $modifierSignature = collect($selectedModifiers)
+        ->pluck('id')->sort()->values()->implode(',');
 
-        // Only merge with existing UNSENT item (kot_round is null)
-        $existingUnsent = OrderItem::where('order_id', $orderId)
+    if ($isInstant) {
+        $existing = OrderItem::where('order_id', $orderId)
             ->where('menu_item_id', $menuItem->id)
-            ->whereNull('kot_round')
+            ->where('status', 'served')
             ->where('is_void', false)
+            ->where('kot_round', 0)
+            ->whereRaw("COALESCE(JSON_EXTRACT(modifiers, '$[*].id'), '[]') = ?",
+                [json_encode(collect($selectedModifiers)->pluck('id')->sort()->values())])
             ->first();
 
-        if ($existingUnsent) {
-            $newQty = $existingUnsent->quantity + $request->quantity;
-            $existingUnsent->update([
+        // Simpler merge for instant: just check same item + kot_round 0
+        $existing = OrderItem::where('order_id', $orderId)
+            ->where('menu_item_id', $menuItem->id)
+            ->where('is_void', false)
+            ->where('kot_round', 0)
+            ->first();
+
+        if ($existing && empty($selectedModifiers)) {
+            $newQty = $existing->quantity + $request->quantity;
+            $existing->update([
                 'quantity'    => $newQty,
-                'total_price' => $existingUnsent->unit_price * $newQty,
+                'total_price' => $existing->unit_price * $newQty,
             ]);
-            $item = $existingUnsent->fresh();
+            $item = $existing->fresh();
         } else {
             $item = OrderItem::create([
                 'order_id'     => $order->id,
@@ -145,20 +171,113 @@ class OrderController extends Controller
                 'total_price'  => $totalPrice,
                 'modifiers'    => $selectedModifiers ?: null,
                 'notes'        => $request->notes,
+                'status'       => 'served',
+                'kot_round'    => 0,
+                'kot_sent_at'  => now(),
+            ]);
+        }
+    } else {
+        // Normal item: only merge if same menu_item + same modifiers + unsent
+        $existing = null;
+
+        if (empty($selectedModifiers)) {
+            // No modifiers — safe to merge with any unsent same item
+            $existing = OrderItem::where('order_id', $orderId)
+                ->where('menu_item_id', $menuItem->id)
+                ->whereNull('kot_round')
+                ->where('is_void', false)
+                ->whereNull('modifiers')
+                ->first();
+        }
+        // With modifiers = always new line (different config)
+
+        if ($existing) {
+            $newQty = $existing->quantity + $request->quantity;
+            $existing->update([
+                'quantity'    => $newQty,
+                'total_price' => $existing->unit_price * $newQty,
+            ]);
+            $item = $existing->fresh();
+        } else {
+            $item = OrderItem::create([
+                'order_id'     => $order->id,
+                'menu_item_id' => $menuItem->id,
+                'item_name'    => $this->buildItemName($menuItem->name, $selectedModifiers),
+                'unit_price'   => $unitPrice,
+                'quantity'     => $request->quantity,
+                'total_price'  => $totalPrice,
+                'modifiers'    => $selectedModifiers ?: null,
+                'notes'        => $request->notes,
                 'status'       => 'pending',
                 'kot_round'    => null,
             ]);
         }
-
-        // Recalculate totals
-        $order->load('activeItems');
-        $order->recalculate();
-
-        return response()->json([
-            'item'  => $item->load('menuItem'),
-            'order' => $this->orderWithItems($orderId),
-        ]);
     }
+
+    $order->load('activeItems');
+    $order->recalculate();
+
+    return response()->json([
+        'item'       => $item->load('menuItem'),
+        'order'      => $this->orderWithItems($orderId),
+        'is_instant' => $isInstant,
+    ]);
+}
+
+/**
+ * Build display name with key modifiers
+ * e.g. "Beef Burger (Large, Hot)"
+ */
+private function buildItemName(string $baseName, array $modifiers): string
+{
+    if (empty($modifiers)) return $baseName;
+
+    $modNames = collect($modifiers)->pluck('name')->implode(', ');
+    return "{$baseName} ({$modNames})";
+}
+
+public function updateCustomer(Request $request, $id)
+{
+    $request->validate(['customer_name' => 'nullable|string|max:100']);
+    $order = Order::findOrFail($id);
+    $order->update(['customer_name' => $request->customer_name ?? 'Walk-in']);
+    return response()->json(['message' => 'Updated', 'customer_name' => $order->customer_name]);
+}
+
+public function storeDirect(Request $request)
+{
+    $request->validate([
+        'customer_name'  => 'nullable|string|max:100',
+        'type'           => 'nullable|in:takeaway,bar,counter',
+        'customer_notes' => 'nullable|string|max:500',
+    ]);
+
+    DB::beginTransaction();
+    try {
+        $order = Order::create([
+            'order_number'    => Order::generateOrderNumber(),
+            'table_id'        => null,   // ← no table
+            'user_id'         => auth()->id(),
+            'type'            => $request->type ?? 'takeaway',
+            'status'          => 'pending',
+            'guests'          => 1,
+            'subtotal'        => 0,
+            'tax_rate'        => 10,
+            'tax_amount'      => 0,
+            'discount_amount' => 0,
+            'total'           => 0,
+            'payment_status'  => 'unpaid',
+            'customer_name'   => $request->customer_name ?? 'Walk-in',
+            'customer_notes'  => $request->customer_notes,
+        ]);
+
+        DB::commit();
+        return response()->json($this->orderWithItems($order->id), 201);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json(['message' => $e->getMessage()], 500);
+    }
+}
 
     public function updateItem(Request $request, $orderId, $itemId)
     {
@@ -198,7 +317,8 @@ class OrderController extends Controller
     public function voidItem(Request $request, $orderId, $itemId)
     {
         $item = OrderItem::where('order_id', $orderId)->findOrFail($itemId);
-        $item->update(['is_void' => true, 'status' => 'void']);
+        // $item->update(['is_void' => true, 'status' => 'void']);
+        $item->update(['is_void' => true]);
 
         $order = Order::findOrFail($orderId);
         $order->load('activeItems');

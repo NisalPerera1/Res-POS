@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import axios from 'axios'
 
 export const useMenuStore = defineStore('menu', () => {
@@ -8,41 +8,16 @@ export const useMenuStore = defineStore('menu', () => {
   const loading        = ref(false)
 
   async function fetchMenu() {
+    if (categories.value.length > 0) return // cached
     loading.value = true
     try {
-      console.log('Fetching menu categories and items...')
-      
-      // Fetch categories and items separately
-      const [categoriesRes, itemsRes] = await Promise.all([
-        axios.get('/menu/categories'),
-        axios.get('/menu/items')
-      ])
-      
-      console.log('Categories:', categoriesRes.data)
-      console.log('Items:', itemsRes.data)
-      
-      // Handle different response formats
-      const categoriesData = Array.isArray(categoriesRes.data) ? categoriesRes.data : []
-      const itemsData = Array.isArray(itemsRes.data) ? itemsRes.data : []
-      
-      // Combine categories with their items
-      categories.value = categoriesData.map(category => ({
-        ...category,
-        menu_items: itemsData.filter(item => item.category_id === category.id)
-      }))
-      
-      console.log('Combined menu data:', categories.value)
-      
-      if (categories.value.length) {
-        activeCategory.value = categories.value[0].id
+      const { data } = await axios.get('/menu')
+      categories.value = data
+      if (data.length && !activeCategory.value) {
+        activeCategory.value = data[0].id
       }
-    } catch (error) {
-      console.error('Error fetching menu:', error)
-      console.error('Error response:', error.response?.data)
-      
-      // Set empty state on error
-      categories.value = []
-      activeCategory.value = null
+    } catch (e) {
+      console.error('fetchMenu failed:', e)
     } finally {
       loading.value = false
     }
@@ -57,5 +32,14 @@ export const useMenuStore = defineStore('menu', () => {
     return cat?.menu_items ?? []
   }
 
-  return { categories, activeCategory, loading, fetchMenu, setActiveCategory, getItemsByCategory }
+  // Force refresh (after menu changes)
+  async function refreshMenu() {
+    categories.value = []
+    await fetchMenu()
+  }
+
+  return {
+    categories, activeCategory, loading,
+    fetchMenu, refreshMenu, setActiveCategory, getItemsByCategory
+  }
 })

@@ -21,16 +21,17 @@
         >
           + Add Table
         </button>
-        <button
-          @click="showDirectOrderModal = true"
-          style="padding:8px 16px; background:#10B981; color:#fff; border:none;
-                 border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;
-                 transition:all 0.15s;"
-          @mouseenter="e => e.currentTarget.style.filter='brightness(1.1)'"
-          @mouseleave="e => e.currentTarget.style.filter='brightness(1)'"
-        >
-          🛒 Direct Order
-        </button>
+       
+          <button
+        @click="$router.push('/direct')"
+        style="padding:6px 14px; background:#10B981; border:none; border-radius:8px;
+               color:#000; font-size:12px; font-weight:700; cursor:pointer;
+               display:flex; align-items:center; gap:5px; transition:all 0.15s;"
+        @mouseenter="e => e.currentTarget.style.filter='brightness(1.1)'"
+        @mouseleave="e => e.currentTarget.style.filter='brightness(1)'"
+      >
+        ⚡ Direct Order
+      </button>
       </div>
 
       <!-- Filter tabs -->
@@ -56,6 +57,7 @@
         </button>
       </div>
     </div>
+
 
     <!-- Stats Row -->
     <div style="display:flex; gap:8px; padding:12px 16px;">
