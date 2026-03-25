@@ -5,9 +5,8 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PaymentController;   // ← ADD THIS
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\DirectOrderController;
 use App\Http\Controllers\StaffController;
 
 // Health check
@@ -66,41 +65,39 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/orders/{id}/items/{itemId}/void',     [OrderController::class, 'voidItem']);
     Route::delete('/orders/{id}/items/{itemId}/void',    [OrderController::class, 'voidItem']);
 
-    // Direct Order Management
-Route::get('/direct-orders/pending', [DirectOrderController::class, 'getPendingOrders']);
-Route::get('/direct-orders/{id}', [DirectOrderController::class, 'getOrder']);
-Route::post('/direct-orders', [DirectOrderController::class, 'createOrder']);
-Route::post('/direct-orders/{id}/switch', [DirectOrderController::class, 'switchOrder']);
-Route::patch('/direct-orders/{id}/customer', [DirectOrderController::class, 'updateCustomer']);
-Route::patch('/direct-orders/{id}/type', [DirectOrderController::class, 'updateType']);
-Route::post('/direct-orders/{id}/cancel', [DirectOrderController::class, 'cancelOrder']);
-
-// Order KOT operations
-    Route::post('/orders/{id}/send-kot', [OrderController::class, 'sendKOT']);
-    Route::post('/orders/{id}/print-kot', [OrderController::class, 'printKOT']);
+    // Order actions
+    Route::post('/orders/{id}/kot',       [OrderController::class, 'sendKOT']);
     Route::patch('/orders/{id}/status',   [OrderController::class, 'updateStatus']);
-    Route::post('/orders/{id}/payments',  [PaymentController::class, 'processPayment']);
-    Route::get('/orders/{id}/receipt',    [PaymentController::class, 'receipt']);
     Route::post('/orders/{id}/discount',  [OrderController::class, 'applyDiscount']);
-    
+
     // Kitchen display routes
     Route::get('/kitchen/tables/{tableId}/items', [OrderController::class, 'getKitchenItemsByTable']);
     Route::get('/kitchen/items', [OrderController::class, 'getAllKitchenItems']);
 
     Route::post('/orders/direct', [OrderController::class, 'storeDirect']);
     Route::patch('/orders/{id}/customer', [OrderController::class, 'updateCustomer']);
+
+
+    // Modifier Groups
+    Route::get('/modifier-groups',          [MenuController::class, 'modifierGroups']);
+    Route::post('/modifier-groups',         [MenuController::class, 'storeModifierGroup']);
+    Route::put('/modifier-groups/{id}',     [MenuController::class, 'updateModifierGroup']);
+
+    // Payments
+    Route::post('/orders/{id}/payments',  [PaymentController::class, 'processPayment']);
+    Route::get('/orders/{id}/receipt',    [PaymentController::class, 'receipt']);
+    Route::get('/payments',               [PaymentController::class, 'index']);
+    Route::get('/payments/summary',       [PaymentController::class, 'summary']);
+    Route::patch('/orders/{id}/service-charge', [OrderController::class, 'updateServiceCharge']);
     
-    // Reports
     Route::get('/reports/summary', [ReportController::class, 'summary']);
     Route::get('/reports/today',   [ReportController::class, 'today']);
-    Route::get('/reports/transactions', [ReportController::class, 'transactions']);
 
-    // ── Staff ────────────────────────────────────────────
     Route::prefix('staff')->group(function () {
         Route::get('/overview',               [StaffController::class, 'overview']);
-        Route::get('/leaves',                 [StaffController::class, 'allLeaves']); 
-        Route::get('/payroll-list',           [StaffController::class, 'payrollList']); 
-        Route::post('/generate-all-payrolls', [StaffController::class, 'generateAllPayrolls']); 
+        Route::get('/leaves',                 [StaffController::class, 'allLeaves']); // add this method
+        Route::get('/payroll-list',           [StaffController::class, 'payrollList']); // add this method
+        Route::post('/generate-all-payrolls', [StaffController::class, 'generateAllPayrolls']); // add this method
         Route::get('/',                       [StaffController::class, 'index']);
         Route::post('/',                      [StaffController::class, 'store']);
         Route::get('/{id}',                   [StaffController::class, 'show']);
@@ -117,11 +114,26 @@ Route::post('/direct-orders/{id}/cancel', [DirectOrderController::class, 'cancel
         Route::get('/{id}/leave',             [StaffController::class, 'leaveRequests']);
         Route::post('/{id}/leave',            [StaffController::class, 'storeLeave']);
         Route::patch('/{id}/leave/{leaveId}', [StaffController::class, 'updateLeave']);
-    });
-
-    // Payments
-    Route::get('/payments',               [PaymentController::class, 'index']);
-    Route::get('/payments/summary',       [PaymentController::class, 'summary']);
-    Route::patch('/orders/{id}/service-charge', [OrderController::class, 'updateServiceCharge']);
-
+    Route::get('/overview',               [StaffController::class, 'overview']);
+    Route::get('/leaves',                 [StaffController::class, 'allLeaves']); // add this method
+    Route::get('/payroll-list',           [StaffController::class, 'payrollList']); // add this method
+    Route::post('/generate-all-payrolls', [StaffController::class, 'generateAllPayrolls']); // add this method
+    Route::get('/',                       [StaffController::class, 'index']);
+    Route::post('/',                      [StaffController::class, 'store']);
+    Route::get('/{id}',                   [StaffController::class, 'show']);
+    Route::put('/{id}',                   [StaffController::class, 'update']);
+    Route::patch('/{id}/toggle-active',   [StaffController::class, 'toggleActive']);
+    Route::post('/{id}/clock-in',         [StaffController::class, 'clockIn']);
+    Route::post('/{id}/clock-out',        [StaffController::class, 'clockOut']);
+    Route::get('/{id}/shifts',            [StaffController::class, 'shifts']);
+    Route::post('/{id}/shifts',           [StaffController::class, 'storeShift']);
+    Route::patch('/{id}/shifts/{shiftId}',[StaffController::class, 'updateShift']);
+    Route::get('/{id}/payrolls',          [StaffController::class, 'payrolls']);
+    Route::post('/{id}/calculate-payroll',[StaffController::class, 'calculatePayroll']);
+    Route::patch('/{id}/payroll/{payrollId}', [StaffController::class, 'updatePayroll']);
+    Route::get('/{id}/leave',             [StaffController::class, 'leaveRequests']);
+    Route::post('/{id}/leave',            [StaffController::class, 'storeLeave']);
+    Route::patch('/{id}/leave/{leaveId}', [StaffController::class, 'updateLeave']);
 });
+
+    });

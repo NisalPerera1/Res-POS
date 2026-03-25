@@ -42,9 +42,12 @@ const isActive = computed(() => {
 })
 
 const iconEmoji = computed(() => ({
-  grid:  '⊞',
-  chef:  '👨‍🍳',
-  menu:  '📋',
-  chart: '📊',
+  grid:   '⊞',
+  arrow:  '➡️',
+  direct: '⚡',
+  chef:   '👨‍🍳',
+  menu:   '📋',
+  chart:  '📊',
+  users:  '👥',
 }[props.icon] ?? '●'))
 </script>

@@ -23,15 +23,22 @@
         </button>
        
           <button
-        @click="$router.push('/direct')"
-        style="padding:6px 14px; background:#10B981; border:none; border-radius:8px;
-               color:#000; font-size:12px; font-weight:700; cursor:pointer;
-               display:flex; align-items:center; gap:5px; transition:all 0.15s;"
-        @mouseenter="e => e.currentTarget.style.filter='brightness(1.1)'"
-        @mouseleave="e => e.currentTarget.style.filter='brightness(1)'"
-      >
-        ⚡ Direct Order
-      </button>
+          @click="$router.push('/direct')"
+          style="padding:12px 24px; background:#10B981; border:none; border-radius:12px;
+                 color:#fff; font-size:16px; font-weight:700; cursor:pointer;
+                 display:flex; align-items:center; gap:8px; transition:all 0.2s;
+                 box-shadow:0 4px 16px rgba(16,185,129,0.3); transform:scale(1);"
+          @mouseenter="e => { 
+            e.currentTarget.style.transform='scale(1.05)'
+            e.currentTarget.style.boxShadow='0 8px 24px rgba(16,185,129,0.4)'
+          }"
+          @mouseleave="e => { 
+            e.currentTarget.style.transform='scale(1)'
+            e.currentTarget.style.boxShadow='0 4px 16px rgba(16,185,129,0.3)'
+          }"
+        >
+          ⚡ DIRECT ORDER
+        </button>
       </div>
 
       <!-- Filter tabs -->
@@ -166,6 +173,14 @@
             style="font-size:10px; color:#64748B; margin-top:4px;"
           >
             #{{ table.current_order_id }}
+          </div>
+
+          <!-- Today's revenue -->
+          <div
+            v-if="table.today_revenue && table.today_revenue > 0"
+            style="font-size:10px; color:#10B981; margin-top:2px; font-weight:600;"
+          >
+            Rs. {{ parseFloat(table.today_revenue).toFixed(0) }}
           </div>
         </div>
       </div>
@@ -384,6 +399,9 @@ import axios from 'axios'
 const router       = useRouter()
 const tables       = ref([])
 const activeFilter = ref('all')
+const todayTotalRevenue = ref(0)
+const todayTableRevenue = ref(0)
+const todayDirectRevenue = ref(0)
 
 // Modal states
 const showAddTableModal = ref(false)
@@ -431,10 +449,7 @@ const stats = computed(() => [
   },
   {
     label: 'Revenue',
-    value: '$' + tables.value
-      .filter(t => t.currentOrder)
-      .reduce((s, t) => s + parseFloat(t.currentOrder?.total ?? 0), 0)
-      .toFixed(0),
+    value: 'Rs. ' + todayTotalRevenue.value.toFixed(0),
     color: '#F59E0B',
   },
 ])
@@ -631,8 +646,21 @@ onMounted(async () => {
   console.log('TableView mounted - loading tables...')
   try {
     const { data } = await axios.get('/tables')
-    console.log('Tables loaded successfully:', data.length)
-    tables.value = data
+    console.log('Tables loaded successfully:', data.tables?.length || data.length)
+    
+    // Handle new data structure (with revenue breakdown) or old structure
+    if (data.tables && data.today_total_revenue !== undefined) {
+      tables.value = data.tables
+      todayTotalRevenue.value = data.today_total_revenue
+      todayTableRevenue.value = data.today_table_revenue
+      todayDirectRevenue.value = data.today_direct_revenue
+    } else {
+      // Backward compatibility - old format
+      tables.value = Array.isArray(data) ? data : []
+      todayTotalRevenue.value = 0
+      todayTableRevenue.value = 0
+      todayDirectRevenue.value = 0
+    }
   } catch (e) {
     console.error('Failed to load tables:', e)
     console.error('Response status:', e.response?.status)

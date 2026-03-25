@@ -85,7 +85,7 @@
                   </div>
                 </div>
                 <div style="font-size:12px; color:#94A3B8; margin-left:8px; flex-shrink:0;">
-                  ${{ parseFloat(item.total_price).toFixed(2) }}
+                  Rs. {{ parseFloat(item.total_price).toFixed(2) }}
                 </div>
               </div>
             </div>
@@ -156,7 +156,7 @@
             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
               <span style="font-size:12px; color:#64748B;">Subtotal</span>
               <span style="font-size:12px; color:#94A3B8;">
-                ${{ subtotal.toFixed(2) }}
+                Rs. {{ subtotal.toFixed(2) }}
               </span>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
@@ -165,19 +165,19 @@
               </span>
               <span style="font-size:12px;"
                 :style="{ color: localTaxRate > 0 ? '#94A3B8' : '#EF4444' }">
-                {{ localTaxRate > 0 ? '$' + localTaxAmount.toFixed(2) : 'Waived' }}
+                {{ localTaxRate > 0 ? 'Rs. ' + localTaxAmount.toFixed(2) : 'Waived' }}
               </span>
             </div>
             <div v-if="discount > 0"
               style="display:flex; justify-content:space-between; margin-bottom:4px;">
               <span style="font-size:12px; color:#10B981;">Discount</span>
-              <span style="font-size:12px; color:#10B981;">-${{ discount.toFixed(2) }}</span>
+              <span style="font-size:12px; color:#10B981;">-Rs. {{ discount.toFixed(2) }}</span>
             </div>
             <div style="display:flex; justify-content:space-between;
                         padding-top:8px; border-top:1px solid #252B38; margin-top:4px;">
               <span style="font-size:15px; font-weight:700; color:#F1F5F9;">Total</span>
               <span style="font-size:20px; font-weight:700; color:#F59E0B;">
-                ${{ localTotal.toFixed(2) }}
+                Rs. {{ localTotal.toFixed(2) }}
               </span>
             </div>
           </div>
@@ -226,7 +226,7 @@
                 color:       parseFloat(tendered) === amt ? '#F59E0B' : '#94A3B8',
               }"
             >
-              ${{ amt }}
+              Rs. {{ amt }}
             </button>
           </div>
           <input
@@ -246,7 +246,7 @@
                    display:flex; justify-content:space-between; align-items:center;">
             <span style="font-size:13px; color:#10B981; font-weight:600;">Change Due</span>
             <span style="font-size:18px; font-weight:700; color:#10B981; font-family:monospace;">
-              ${{ change.toFixed(2) }}
+              Rs. {{ change.toFixed(2) }}
             </span>
           </div>
         </div>
@@ -295,7 +295,7 @@
           @mouseenter="e => { if(!processing && !chargeUpdating) e.currentTarget.style.filter='brightness(1.1)' }"
           @mouseleave="e => e.currentTarget.style.filter='brightness(1)'"
         >
-          {{ processing ? 'Processing...' : chargeUpdating ? 'Updating...' : `✓ Charge $${localTotal.toFixed(2)}` }}
+          {{ processing ? 'Processing...' : chargeUpdating ? 'Updating...' : `✓ Charge Rs. ${localTotal.toFixed(2)}` }}
         </button>
       </div>
 
@@ -366,7 +366,7 @@
                   </div>
                 </div>
                 <span style="font-size:12px; color:#94A3B8; margin-left:8px;">
-                  ${{ item.total_price }}
+                  Rs. {{ item.total_price }}
                 </span>
               </div>
             </div>
@@ -375,7 +375,7 @@
           <div style="border-top:1px dashed #252B38; padding-top:10px; margin-bottom:12px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
               <span style="font-size:12px; color:#64748B;">Subtotal</span>
-              <span style="font-size:12px; color:#94A3B8;">${{ receiptData?.totals?.subtotal }}</span>
+              <span style="font-size:12px; color:#94A3B8;">Rs. {{ receiptData?.totals?.subtotal }}</span>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
               <span style="font-size:12px; color:#64748B;">
@@ -384,19 +384,19 @@
               <span style="font-size:12px; color:#94A3B8;">
                 {{ parseFloat(receiptData?.totals?.tax_rate) === 0
                    ? 'Waived'
-                   : '$' + receiptData?.totals?.tax_amount }}
+                   : 'Rs. ' + receiptData?.totals?.tax_amount }}
               </span>
             </div>
             <div v-if="parseFloat(receiptData?.totals?.discount_amount) > 0"
               style="display:flex; justify-content:space-between; margin-bottom:3px;">
               <span style="font-size:12px; color:#10B981;">Discount</span>
-              <span style="font-size:12px; color:#10B981;">-${{ receiptData.totals.discount_amount }}</span>
+              <span style="font-size:12px; color:#10B981;">-Rs. {{ receiptData.totals.discount_amount }}</span>
             </div>
             <div style="display:flex; justify-content:space-between;
                         padding-top:8px; border-top:1px dashed #252B38; margin-top:4px;">
               <span style="font-size:15px; font-weight:700; color:#F1F5F9;">TOTAL</span>
               <span style="font-size:15px; font-weight:700; color:#F59E0B;">
-                ${{ receiptData?.totals?.total }}
+                Rs. {{ receiptData?.totals?.total }}
               </span>
             </div>
           </div>
@@ -410,17 +410,17 @@
             <div v-for="p in receiptData?.payments" :key="p.id" style="margin-bottom:6px;">
               <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
                 <span style="font-size:12px; color:#F1F5F9; font-weight:600;">{{ p.method_label }}</span>
-                <span style="font-size:12px; font-weight:700; color:#10B981;">${{ p.amount }}</span>
+                <span style="font-size:12px; font-weight:700; color:#10B981;">Rs. {{ p.amount }}</span>
               </div>
               <div v-if="p.method === 'cash' && parseFloat(p.tendered) > parseFloat(p.amount)"
                 style="display:flex; justify-content:space-between;">
                 <span style="font-size:11px; color:#64748B;">Tendered</span>
-                <span style="font-size:11px; color:#64748B;">${{ p.tendered }}</span>
+                <span style="font-size:11px; color:#64748B;">Rs. {{ p.tendered }}</span>
               </div>
               <div v-if="parseFloat(p.change_amount) > 0"
                 style="display:flex; justify-content:space-between;">
                 <span style="font-size:11px; color:#10B981;">Change</span>
-                <span style="font-size:11px; font-weight:700; color:#10B981;">${{ p.change_amount }}</span>
+                <span style="font-size:11px; font-weight:700; color:#10B981;">Rs. {{ p.change_amount }}</span>
               </div>
               <div v-if="p.reference"
                 style="display:flex; justify-content:space-between;">

@@ -14,7 +14,33 @@ class TableController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        return response()->json($tables);
+        // Add today's revenue to each table (table orders only)
+        $tables->each(function ($table) {
+            $table->today_revenue = Order::where('table_id', $table->id)
+                ->where('payment_status', 'paid')
+                ->whereDate('created_at', today())
+                ->sum('total');
+        });
+
+        // Calculate total today's revenue (table + direct orders)
+        $tableRevenue = Order::whereNotNull('table_id')
+            ->where('payment_status', 'paid')
+            ->whereDate('created_at', today())
+            ->sum('total');
+            
+        $directRevenue = Order::whereNull('table_id')
+            ->where('payment_status', 'paid')
+            ->whereDate('created_at', today())
+            ->sum('total');
+            
+        $totalRevenue = $tableRevenue + $directRevenue;
+
+        return response()->json([
+            'tables' => $tables,
+            'today_total_revenue' => $totalRevenue,
+            'today_table_revenue' => $tableRevenue,
+            'today_direct_revenue' => $directRevenue
+        ]);
     }
 
     public function show($id)

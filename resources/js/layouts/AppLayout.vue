@@ -20,6 +20,7 @@
 
       <NavBtn to="/menu"    icon="menu"      label="Menu"    v-if="auth.isAdmin" />
       <NavBtn to="/reports" icon="chart"     label="Reports" v-if="auth.isAdmin" />
+      <NavBtn to="/staff"   icon="users"     label="Staff"   v-if="auth.isAdmin" />
 
       <div style="flex:1;" />
 
@@ -30,6 +31,10 @@
         </div>
         <div style="font-size:10px; color:#64748B; font-family:monospace; max-width:48px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
           {{ auth.user?.name || 'admin' }}
+        </div>
+        <!-- Session Timer -->
+        <div style="font-size:8px; font-family:monospace; text-align:center;" :style="{ color: sessionColor }">
+          {{ formatSessionTime() }}
         </div>
       </div>
 
@@ -60,10 +65,57 @@
 <script setup>
 import { useAuthStore } from '@/stores/auth'
 import { useRouter }    from 'vue-router'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import NavBtn           from '@/components/UI/NavBtn.vue'
+import { useActivityTracker } from '@/composables/useActivityTracker'
 
 const auth   = useAuthStore()
 const router = useRouter()
+const currentTime = ref(Date.now())
+let timeInterval = null
+
+// Start activity tracking
+useActivityTracker()
+
+// Update current time every second
+onMounted(() => {
+  timeInterval = setInterval(() => {
+    currentTime.value = Date.now()
+  }, 1000)
+})
+
+onUnmounted(() => {
+  if (timeInterval) {
+    clearInterval(timeInterval)
+  }
+})
+
+// Format session remaining time
+function formatSessionTime() {
+  if (!auth.isLoggedIn) return '--:--'
+  
+  const SESSION_TIMEOUT = 10 * 60 * 1000 // 10 minutes
+  const elapsed = currentTime.value - auth.lastActivity
+  const remaining = Math.max(0, SESSION_TIMEOUT - elapsed)
+  
+  const minutes = Math.floor(remaining / 60000)
+  const seconds = Math.floor((remaining % 60000) / 1000)
+  
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+// Session status color
+const sessionColor = computed(() => {
+  if (!auth.isLoggedIn) return '#64748B'
+  
+  const SESSION_TIMEOUT = 10 * 60 * 1000
+  const elapsed = currentTime.value - auth.lastActivity
+  const remaining = SESSION_TIMEOUT - elapsed
+  
+  if (remaining < 2 * 60 * 1000) return '#EF4444' // Red: less than 2 minutes
+  if (remaining < 5 * 60 * 1000) return '#F59E0B' // Orange: less than 5 minutes
+  return '#10B981' // Green: 5+ minutes
+})
 
 async function handleLogout() {
   await auth.logout()

@@ -24,6 +24,11 @@ const routes = [
         component: () => import('@/views/POSScreen.vue'),
       },
       {
+        path: 'pos/direct/:orderId',
+        name: 'pos-direct',
+        component: () => import('@/views/POSScreen.vue'),
+      },
+      {
         path: 'kitchen',
         name: 'kitchen',
         component: () => import('@/views/KitchenDisplay.vue'),
@@ -31,7 +36,7 @@ const routes = [
       {
         path: 'direct',
         name: 'direct-order',
-        component: () => import('@/views/DirectOrder.vue'),
+        component: () => import('@/views/DirectOrderSimple.vue'),
       },
       {
         path: 'menu',
@@ -43,6 +48,11 @@ const routes = [
         name: 'reports',
         component: () => import('@/views/Reports.vue'),
       },
+
+{ path: 'staff', name: 'staff', component: () => import('@/views/StaffManagement.vue') },
+
+
+
     ],
   },
 ]

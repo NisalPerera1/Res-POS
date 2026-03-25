@@ -32,9 +32,15 @@ export const useOrderStore = defineStore('orders', () => {
   }
 
   function clearOrder() {
+    const currentOrderData = currentOrder.value
     currentOrder.value = null
-    localStorage.removeItem(LS_ORDER_KEY)
-    localStorage.removeItem(LS_TABLE_KEY)
+    
+    // Only clear from localStorage if it's a table order
+    // Keep direct orders in localStorage for persistence
+    if (!currentOrderData || currentOrderData.table_id) {
+      localStorage.removeItem(LS_ORDER_KEY)
+      localStorage.removeItem(LS_TABLE_KEY)
+    }
   }
 
   const clearStorage = clearOrder
@@ -139,7 +145,7 @@ export const useOrderStore = defineStore('orders', () => {
   // ── sendKOT ───────────────────────────────────────────
   async function sendKOT(orderId) {
     try {
-      const { data } = await axios.post(`/orders/${orderId}/kot`)
+      const { data } = await axios.post(`/orders/${orderId}/send-kot`)
       // data = { message, round, items_sent, order: {...} }
       if (data.order) {
         setOrder(data.order)
@@ -148,8 +154,8 @@ export const useOrderStore = defineStore('orders', () => {
           '| sent:', data.items_sent,
           '| items after:', data.order.items?.map(i => ({
             name: i.item_name,
-            status: i.status,
             kot_round: i.kot_round,
+            status: i.status
           }))
         )
       } else {
@@ -210,5 +216,6 @@ export const useOrderStore = defineStore('orders', () => {
     saveOrderToStorage,
     saveTableToStorage,
     getCurrentTable,
+    setOrder,
   }
 })

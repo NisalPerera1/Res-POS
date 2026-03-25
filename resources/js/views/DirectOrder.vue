@@ -17,6 +17,15 @@
           <div style="font-size:11px; color:#64748B; margin-top:2px;">
             {{ currentOrder?.order_number ?? '...' }}
           </div>
+          <!-- Load Pending Orders Button -->
+          <button 
+            v-if="!currentOrder"
+            @click="loadPendingDirectOrders"
+            style="margin-top:8px; padding:4px 12px; background:#10B981; color:#fff; 
+                   border:none; border-radius:6px; font-size:11px; cursor:pointer;"
+          >
+            🔄 Load Pending Orders
+          </button>
         </div>
 
         <!-- Order type buttons -->
@@ -758,14 +767,70 @@ function showToast(message, type = 'success') {
   setTimeout(() => { toast.value.show = false }, 3000)
 }
 
+// Load pending direct orders from localStorage
+async function loadPendingDirectOrders() {
+  try {
+    const savedOrder = localStorage.getItem('pos_current_order')
+    if (savedOrder) {
+      const orderData = JSON.parse(savedOrder)
+      if (!orderData.table_id) {
+        console.log('Manually loading pending direct order:', orderData.order_number)
+        
+        // Load the order from server to get fresh data
+        await orderStore.fetchOrder(orderData.id)
+        showToast(`Loaded order ${orderData.order_number} ✓`, 'success')
+      } else {
+        showToast('No pending direct orders found', 'info')
+      }
+    } else {
+      showToast('No pending orders in storage', 'info')
+    }
+  } catch (e) {
+    console.error('Failed to load pending orders:', e)
+    showToast('Failed to load pending orders', 'error')
+  }
+}
+
 // ── Lifecycle ───────────────────────────────────────────
 onMounted(async () => {
   loading.value = true
-  orderStore.clearOrder()
+  
+  // Check if there's an existing direct order in localStorage
+  const savedOrder = localStorage.getItem('pos_current_order')
+  let hasExistingOrder = false
+  
+  if (savedOrder) {
+    try {
+      const orderData = JSON.parse(savedOrder)
+      // Only load if it's a direct order (no table_id)
+      if (!orderData.table_id) {
+        console.log('Loading existing direct order from storage:', orderData.order_number)
+        orderStore.setOrder(orderData)
+        hasExistingOrder = true
+        
+        // Fetch fresh data from server to ensure it's up to date
+        try {
+          await orderStore.fetchOrder(orderData.id)
+        } catch (e) {
+          console.warn('Failed to fetch fresh order data, using cached:', e)
+        }
+      } else {
+        // Clear if it's a table order
+        orderStore.clearOrder()
+      }
+    } catch (e) {
+      console.warn('Failed to load saved order:', e)
+      orderStore.clearOrder()
+    }
+  } else {
+    orderStore.clearOrder()
+  }
+
   try {
     await Promise.all([
       menuStore.fetchMenu(),
-      orderStore.createOrder({
+      // Only create new order if we don't have an existing one
+      hasExistingOrder ? Promise.resolve() : orderStore.createOrder({
         table_id:      null,
         type:          selectedType.value,
         customer_name: customerName.value,

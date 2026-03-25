@@ -1,15 +1,17 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Table;
 use App\Models\MenuItem;
-use App\Models\Modifier;         
-use App\Models\ModifierGroup;
-use App\Events\OrderStatusUpdated;
+use App\Models\Modifier;
+use App\Services\KOTPrinterService;
+use App\Jobs\PrintKOTJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Events\OrderStatusUpdated;
 
 class OrderController extends Controller
 {
@@ -317,15 +319,40 @@ public function storeDirect(Request $request)
     public function voidItem(Request $request, $orderId, $itemId)
     {
         $item = OrderItem::where('order_id', $orderId)->findOrFail($itemId);
-        // $item->update(['is_void' => true, 'status' => 'void']);
+        
+        // Only print void notice if item was already sent to kitchen
+        $shouldPrintVoid = $item->kot_round && !$item->is_void;
+        
         $item->update(['is_void' => true]);
+
+        // Print void notice to kitchen if item was already sent
+        if ($shouldPrintVoid) {
+            try {
+                $printer = new KOTPrinterService();
+                $reason = $request->get('reason', 'Customer request');
+                $printSuccess = $printer->printVoidNotice(
+                    Order::findOrFail($orderId), 
+                    $item, 
+                    $reason
+                );
+                
+                if ($printSuccess) {
+                    \Log::info('Void notice printed for Order #' . Order::find($orderId)->order_number . ' Item: ' . $item->item_name);
+                } else {
+                    \Log::warning('Void notice print failed for Order #' . Order::find($orderId)->order_number . ' Item: ' . $item->item_name);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Void notice printing error: ' . $e->getMessage());
+            }
+        }
 
         $order = Order::findOrFail($orderId);
         $order->load('activeItems');
         $order->recalculate();
 
         return response()->json([
-            'message' => 'Item voided',
+            'message' => 'Item voided' . ($shouldPrintVoid && isset($printSuccess) && $printSuccess ? " and notice printed" : ""),
+            'printed' => $shouldPrintVoid && ($printSuccess ?? false),
             'order'   => $this->orderWithItems($orderId),
         ]);
     }
@@ -361,6 +388,31 @@ public function storeDirect(Request $request)
             'kot_sent_at' => $order->kot_sent_at ?? now(),
         ]);
 
+        // Print KOT to kitchen printer (async for faster response)
+        try {
+            $autoPrint = config('pos.kot.auto_print', true);
+            
+            if ($autoPrint) {
+                // Dispatch to queue for async printing
+                PrintKOTJob::dispatch($order, $nextRound, $unsentItems);
+                \Log::info('KOT print job dispatched for Order #' . $order->order_number . ' Round ' . $nextRound);
+                $printSuccess = true; // Assume success for UI feedback
+            } else {
+                // Sync printing if auto-print disabled
+                $printer = new KOTPrinterService();
+                $printSuccess = $printer->printKOT($order, $nextRound, $unsentItems);
+                
+                if ($printSuccess) {
+                    \Log::info('KOT printed successfully for Order #' . $order->order_number . ' Round ' . $nextRound);
+                } else {
+                    \Log::warning('KOT print failed for Order #' . $order->order_number . ' Round ' . $nextRound);
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('KOT printing error: ' . $e->getMessage());
+            $printSuccess = false;
+        }
+
         try {
             broadcast(new OrderStatusUpdated($order))->toOthers();
         } catch (\Exception $e) {
@@ -368,11 +420,62 @@ public function storeDirect(Request $request)
         }
 
         return response()->json([
-            'message'    => "KOT Round {$nextRound} sent to kitchen",
+            'message'    => "KOT Round {$nextRound} sent to kitchen" . (isset($printSuccess) && $printSuccess ? " and print dispatched" : ""),
             'round'      => $nextRound,
             'items_sent' => $unsentItems->count(),
+            'printed'    => $printSuccess ?? false,
             'order'      => $this->orderWithItems($id),  // ✅ full order returned
         ]);
+    }
+
+    /**
+     * Manually print KOT for an order
+     */
+    public function printKOT(Request $request, $id)
+    {
+        $request->validate([
+            'kot_round' => 'nullable|integer|min:1'
+        ]);
+
+        $order = Order::with(['items', 'table'])->findOrFail($id);
+        $kotRound = $request->kot_round ?? ($order->items()->max('kot_round') ?? 1);
+
+        $items = $order->items()
+            ->where('kot_round', $kotRound)
+            ->where('is_void', false)
+            ->get();
+
+        if ($items->isEmpty()) {
+            return response()->json([
+                'message' => 'No items found for KOT Round ' . $kotRound
+            ], 404);
+        }
+
+        try {
+            $printer = new KOTPrinterService();
+            $success = $printer->printKOT($order, $kotRound, $items);
+
+            if ($success) {
+                \Log::info('Manual KOT printed for Order #' . $order->order_number . ' Round ' . $kotRound);
+                return response()->json([
+                    'message' => 'KOT printed successfully',
+                    'order' => $order->order_number,
+                    'kot_round' => $kotRound,
+                    'items_count' => $items->count()
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'KOT print failed',
+                    'error' => 'Printer not responding'
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Manual KOT print error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'KOT print error',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function updateStatus(Request $request, $id)
@@ -534,6 +637,51 @@ public function updateServiceCharge(Request $request, $id)
 
     return response()->json($this->orderWithItems($id));
 }
+
+    /**
+     * Get kitchen items for specific table
+     * GET /api/kitchen/tables/{tableId}/items
+     */
+    public function getKitchenItemsByTable($tableId)
+    {
+        $items = OrderItem::with(['order', 'menuItem'])
+            ->whereHas('order', function($query) use ($tableId) {
+                $query->where('table_id', $tableId)
+                      ->where('payment_status', '!=', 'paid')
+                      ->whereIn('status', ['pending', 'preparing', 'ready']);
+            })
+            ->where('is_void', false)
+            ->orderBy('kot_round', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->groupBy(function($item) {
+                return $item->order_id . '-' . $item->kot_round;
+            });
+
+        return response()->json($items);
+    }
+
+    /**
+     * Get all kitchen items (for main kitchen display)
+     * GET /api/kitchen/items
+     */
+    public function getAllKitchenItems()
+    {
+        $items = OrderItem::with(['order', 'menuItem', 'order.table'])
+            ->whereHas('order', function($query) {
+                $query->where('payment_status', '!=', 'paid')
+                      ->whereIn('status', ['pending', 'preparing', 'ready']);
+            })
+            ->where('is_void', false)
+            ->orderBy('kot_round', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->groupBy(function($item) {
+                return $item->order_id . '-' . $item->kot_round;
+            });
+
+        return response()->json($items);
+    }
 
 
 }

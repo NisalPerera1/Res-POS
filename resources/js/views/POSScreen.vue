@@ -76,7 +76,7 @@
           >
             <div style="font-size:28px; margin-bottom:6px;">{{ item.icon ?? '🍽️' }}</div>
             <div style="font-size:12px; font-weight:500; color:#F1F5F9; line-height:1.3;">{{ item.name }}</div>
-            <div style="font-size:14px; font-weight:700; color:#F59E0B; margin-top:5px;">${{ item.price }}</div>
+            <div style="font-size:14px; font-weight:700; color:#F59E0B; margin-top:5px;">Rs. {{ item.price }}</div>
             <div v-if="item.is_popular"
               style="font-size:9px; background:rgba(16,185,129,0.12); color:#10B981;
                      border-radius:4px; padding:2px 7px; margin-top:4px;">Popular</div>
@@ -174,7 +174,7 @@
            background:rgba(100,116,139,0.12); color:#64748B; font-weight:500;"
   >
     {{ mod.name }}
-    <span v-if="mod.price > 0" style="color:#F59E0B;">+${{ parseFloat(mod.price).toFixed(2) }}</span>
+    <span v-if="mod.price > 0" style="color:#F59E0B;">+Rs. {{ parseFloat(mod.price).toFixed(2) }}</span>
   </span>
 </div>
                     <div v-if="item.notes"
@@ -191,7 +191,7 @@
                     :style="{ background: statusBg(item.status), color: statusColor(item.status) }"
                   >×{{ item.quantity }}</div>
                   <div style="font-size:12px; font-weight:700; color:#94A3B8; min-width:44px; text-align:right;">
-                    ${{ parseFloat(item.total_price).toFixed(2) }}
+                    Rs. {{ parseFloat(item.total_price).toFixed(2) }}
                   </div>
                 </div>
 
@@ -256,7 +256,7 @@
                   </div>
                 </div>
                 <div style="font-size:13px; font-weight:700; color:#F59E0B; flex-shrink:0;">
-                  ${{ parseFloat(item.total_price).toFixed(2) }}
+                  Rs. {{ parseFloat(item.total_price).toFixed(2) }}
                 </div>
               </div>
 
@@ -328,18 +328,18 @@
         <div style="display:flex; justify-content:space-between;
                     font-size:12px; color:#64748B; margin-bottom:4px;">
           <span>Subtotal</span>
-          <span>${{ currentOrder?.subtotal ?? '0.00' }}</span>
+          <span>Rs. {{ currentOrder?.subtotal ?? '0.00' }}</span>
         </div>
         <div style="display:flex; justify-content:space-between;
                     font-size:12px; color:#64748B; margin-bottom:4px;">
           <span>Service Charge (10%)</span>
-          <span>${{ currentOrder?.tax_amount ?? '0.00' }}</span>
+          <span>Rs. {{ currentOrder?.tax_amount ?? '0.00' }}</span>
         </div>
         <div style="display:flex; justify-content:space-between; font-weight:700;
                     font-size:15px; border-top:1px solid #252B38;
                     padding-top:10px; margin-top:6px;">
           <span style="color:#F1F5F9;">Total</span>
-          <span style="color:#F59E0B;">${{ currentOrder?.total ?? '0.00' }}</span>
+          <span style="color:#F59E0B;">Rs. {{ currentOrder?.total ?? '0.00' }}</span>
         </div>
       </div>
 
@@ -365,7 +365,7 @@
           @mouseenter="e => { if(orderItems.length > 0) e.currentTarget.style.filter='brightness(1.1)' }"
           @mouseleave="e => e.currentTarget.style.filter='brightness(1)'"
         >
-          💳 Charge ${{ currentOrder?.total ?? '0.00' }}
+          💳 Charge Rs. {{ currentOrder?.total ?? '0.00' }}
         </button>
       </div>
     </div>

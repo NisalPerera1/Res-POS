@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Table;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -65,6 +66,14 @@ class PaymentController extends Controller
                     'status'       => 'completed',
                     'completed_at' => now(),
                 ]);
+
+                // Mark all order items as served when payment is completed
+                OrderItem::where('order_id', $order->id)
+                    ->where('is_void', false)
+                    ->where('status', '!=', 'served')
+                    ->update([
+                        'status' => 'served',
+                    ]);
 
                 // Free the table
                 if ($order->table_id) {
