@@ -92,8 +92,9 @@
           </div>
         </div>
 
-        <!-- ── SERVICE CHARGE EDITOR ── -->
-        <div style="background:#12151C; border:1px solid #252B38; border-radius:10px;
+        <!-- ── SERVICE CHARGE EDITOR (Table Orders Only) ── -->
+        <div v-if="props.order?.table_id" 
+             style="background:#12151C; border:1px solid #252B38; border-radius:10px;
                     padding:14px; margin-bottom:14px;">
 
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
@@ -166,6 +167,54 @@
               <span style="font-size:12px;"
                 :style="{ color: localTaxRate > 0 ? '#94A3B8' : '#EF4444' }">
                 {{ localTaxRate > 0 ? 'Rs. ' + localTaxAmount.toFixed(2) : 'Waived' }}
+              </span>
+            </div>
+            <div v-if="discount > 0"
+              style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span style="font-size:12px; color:#10B981;">Discount</span>
+              <span style="font-size:12px; color:#10B981;">-Rs. {{ discount.toFixed(2) }}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;
+                        padding-top:8px; border-top:1px solid #252B38; margin-top:4px;">
+              <span style="font-size:15px; font-weight:700; color:#F1F5F9;">Total</span>
+              <span style="font-size:20px; font-weight:700; color:#F59E0B;">
+                Rs. {{ localTotal.toFixed(2) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SERVICE CHARGE STATUS (Direct Orders) ── -->
+        <div v-else
+             style="background:#12151C; border:1px solid #252B38; border-radius:10px;
+                    padding:14px; margin-bottom:14px;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="font-size:12px; font-weight:700; color:#F1F5F9; display:flex; align-items:center; gap:6px;">
+              Service Charge
+              <span style="font-size:9px; padding:1px 6px; border-radius:4px;
+                     background:rgba(16,185,129,0.1); color:#10B981; font-weight:700;">
+                NOT APPLICABLE
+              </span>
+            </div>
+            <div style="font-size:10px; color:#64748B;">
+              Direct orders have 0% service charge
+            </div>
+          </div>
+          
+          <!-- Live totals preview -->
+          <div style="border-top:1px solid #252B38; padding-top:10px; margin-top:10px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span style="font-size:12px; color:#64748B;">Subtotal</span>
+              <span style="font-size:12px; color:#94A3B8;">
+                Rs. {{ subtotal.toFixed(2) }}
+              </span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <span style="font-size:12px; color:#64748B;">
+                Service Charge
+              </span>
+              <span style="font-size:12px; color:#10B981;">
+                Waived (Direct Order)
               </span>
             </div>
             <div v-if="discount > 0"
@@ -464,7 +513,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useOrderStore }            from '@/stores/orders'
 import axios                        from 'axios'
 
@@ -663,5 +712,24 @@ function printReceipt() {
 
 onMounted(() => {
   localTaxRate.value = parseFloat(props.order?.tax_rate ?? 10)
+  
+  // Add ENTER key listener for new order after payment
+  const handleEnterKey = (e) => {
+    if (e.key === 'Enter' && paid.value) {
+      emit('paid')
+    }
+  }
+  document.addEventListener('keydown', handleEnterKey)
+  
+  // Store handler for cleanup
+  window._paymentModalEnterHandler = handleEnterKey
+})
+
+onUnmounted(() => {
+  // Remove ENTER key listener
+  if (window._paymentModalEnterHandler) {
+    document.removeEventListener('keydown', window._paymentModalEnterHandler)
+    delete window._paymentModalEnterHandler
+  }
 })
 </script>

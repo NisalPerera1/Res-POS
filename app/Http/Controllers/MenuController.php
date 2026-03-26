@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Category;
@@ -6,6 +7,7 @@ use App\Models\MenuItem;
 use App\Models\Modifier;
 use App\Models\ModifierGroup;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MenuController extends Controller
 {
@@ -22,7 +24,10 @@ class MenuController extends Controller
                           $q->where('is_active', true)
                             ->orderBy('sort_order')
                             ->with([
-                                'modifiers' => fn($q) => $q->where('is_active', true)->orderBy('price')
+                                'modifiers' => function($q) {
+                                    $q->where('is_active', true)
+                                      ->orderBy('price');
+                                }
                             ]);
                       }
                   ]);
@@ -153,7 +158,6 @@ class MenuController extends Controller
         $item = MenuItem::findOrFail($id);
         $item->update($request->except('modifier_group_ids'));
 
-        // Sync modifier groups — empty array removes all
         if ($request->has('modifier_group_ids')) {
             $item->modifierGroups()->sync($request->modifier_group_ids ?? []);
         }
@@ -228,7 +232,6 @@ class MenuController extends Controller
     public function destroyModifierGroup($id)
     {
         $group = ModifierGroup::findOrFail($id);
-        // Detach from all menu items first
         $group->menuItems()->detach();
         $group->modifiers()->delete();
         $group->delete();
@@ -275,5 +278,28 @@ class MenuController extends Controller
     {
         Modifier::findOrFail($id)->delete();
         return response()->json(['message' => 'Modifier deleted']);
+    }
+
+    // ── Modifier Pricing Helpers ──────────────────────────
+
+    /**
+     * GET /menu/items/{id}/modifiers
+     *
+     * Returns only the active modifiers belonging to groups
+     * that are actually attached to this menu item.
+     * Previously returned ALL modifiers in the system — fixed.
+     */
+    public function itemModifiers($id)
+    {
+        $item = MenuItem::with([
+            'modifierGroups.modifiers' => fn($q) => $q->where('is_active', true)->orderBy('price')
+        ])->findOrFail($id);
+
+        // Flatten all active modifiers from all attached groups
+        $modifiers = $item->modifierGroups
+            ->flatMap(fn($group) => $group->modifiers)
+            ->values();
+
+        return response()->json($modifiers);
     }
 }

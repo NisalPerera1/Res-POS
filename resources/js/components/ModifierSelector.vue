@@ -86,10 +86,10 @@
                     :style="{ color: isSelected(mod.id) ? '#F1F5F9' : '#94A3B8' }">
                     {{ mod.name }}
                   </div>
-                  <div v-if="mod.price > 0"
+                  <div v-if="getModifierPrice(mod) > 0"
                     style="font-size:11px; margin-top:1px;"
                     :style="{ color: isSelected(mod.id) ? '#F59E0B' : '#64748B' }">
-                    +${{ parseFloat(mod.price).toFixed(2) }}
+                    +${{ getModifierPrice(mod).toFixed(2) }}
                   </div>
                   <div v-else style="font-size:11px; color:#64748B; margin-top:1px;">
                     Included
@@ -197,7 +197,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
 
 const props = defineProps({
   item: {
@@ -212,6 +213,24 @@ const qty          = ref(1)
 const notes        = ref('')
 const selected     = ref({})   // { groupId: [modifierId, ...] }
 const groupErrors  = ref({})
+const itemModifierPricing = ref({}) // Store item-specific pricing
+
+// Load item-specific modifier pricing on mount
+onMounted(async () => {
+  try {
+    const { data } = await axios.get(`/menu/items/${props.item.id}/modifier-pricing`)
+    itemModifierPricing.value = data.reduce((acc, p) => {
+      acc[p.modifier_id] = {
+        pricing_type: p.pricing_type,
+        custom_price: p.custom_price,
+        increment_price: p.increment_price,
+      }
+      return acc
+    }, {})
+  } catch (e) {
+    console.error('Failed to load modifier pricing:', e)
+  }
+})
 
 // Pre-select first option for required single-select groups
 props.item.modifier_groups?.forEach(group => {
@@ -239,8 +258,23 @@ const selectedModifierObjects = computed(() =>
   allModifiers.value.filter(m => allSelectedIds.value.includes(m.id))
 )
 
+// Calculate the correct price for a modifier based on the menu item
+const getModifierPrice = (modifier) => {
+  // First check if we have item-specific pricing loaded
+  const itemPricing = itemModifierPricing.value[modifier.id]
+  if (itemPricing) {
+    if (itemPricing.pricing_type === 'absolute') {
+      return parseFloat(itemPricing.custom_price || 0)
+    } else if (itemPricing.pricing_type === 'increment') {
+      return parseFloat(itemPricing.increment_price || 0)
+    }
+  }
+  // Fallback to default modifier price
+  return parseFloat(modifier.price || 0)
+}
+
 const modifierExtra = computed(() =>
-  selectedModifierObjects.value.reduce((s, m) => s + parseFloat(m.price ?? 0), 0)
+  selectedModifierObjects.value.reduce((s, m) => s + getModifierPrice(m), 0)
 )
 
 const totalPrice = computed(() =>

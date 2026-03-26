@@ -59,7 +59,7 @@
                   <span v-if="item.status === 'ready'" style="color:#10B981; margin-left:8px;">✅ Ready</span>
                 </div>
                 <div style="font-size:11px; color:#64748B; margin-top:2px;">
-                  {{ item.quantity }} × ${{ item.unit_price }} = ${{ item.total_price }}
+                  {{ item.quantity }} × Rs.{{ item.unit_price }} = Rs.{{ item.total_price }}
                 </div>
                 <div v-if="item.notes" style="font-size:11px; color:#F59E0B; margin-top:4px; font-style:italic;">
                   📝 {{ item.notes }}
@@ -93,7 +93,7 @@
               <span style="font-size:11px; color:#64748B;">{{ order.customer_name || 'Guest' }}</span>
             </div>
             <div style="font-weight:700; font-size:14px; color:#F59E0B; text-align:center;">
-              Total: ${{ order.total }}
+              Total: Rs.{{ order.total }}
             </div>
           </div>
 

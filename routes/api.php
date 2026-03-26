@@ -9,6 +9,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\DirectOrderController;
 use App\Http\Controllers\StaffController;
+use App\Http\Controllers\ModifierPricingController;
 
 // Health check
 Route::get('/health', fn() => response()->json(['status' => 'ok', 'timestamp' => now()]));
@@ -29,6 +30,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/menu/items',                            [MenuController::class, 'items']);
     Route::get('/menu/items/{id}',                       [MenuController::class, 'showItem']);
+    Route::get('/menu/items/{id}/modifiers',           [MenuController::class, 'itemModifiers']);
+    Route::get('/menu/items/{item}/modifier-pricing',    [ModifierPricingController::class, 'index']);
+    Route::patch('/menu/items/{item}/modifier-pricing',   [ModifierPricingController::class, 'update']);
+    Route::get('/menu/items/{item}/price-preview',   [OrderController::class, 'pricePreview']);
     Route::post('/menu/items',                           [MenuController::class, 'storeItem']);
     Route::put('/menu/items/{id}',                       [MenuController::class, 'updateItem']);
     Route::delete('/menu/items/{id}',                    [MenuController::class, 'destroyItem']);
@@ -65,6 +70,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // ✅ BOTH patch and delete for void — covers all cases
     Route::patch('/orders/{id}/items/{itemId}/void',     [OrderController::class, 'voidItem']);
     Route::delete('/orders/{id}/items/{itemId}/void',    [OrderController::class, 'voidItem']);
+    // Delete route for removing items completely
+    Route::delete('/orders/{id}/items/{itemId}',         [OrderController::class, 'removeItem']);
 
     // Direct Order Management
 Route::get('/direct-orders/pending', [DirectOrderController::class, 'getPendingOrders']);

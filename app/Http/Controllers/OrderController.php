@@ -51,15 +51,19 @@ class OrderController extends Controller
 
         DB::beginTransaction();
         try {
+            // Determine service charge based on order type
+            $isDirectOrder = is_null($request->table_id);
+            $taxRate = $isDirectOrder ? 0 : 10; // 0% for direct orders, 10% for table orders
+            
             $order = Order::create([
                 'order_number'    => Order::generateOrderNumber(),
                 'table_id'        => $request->table_id,
                 'user_id'         => auth()->id(),
-                'type'            => $request->type ?? 'dine_in',
+                'type'            => $request->type ?? ($isDirectOrder ? 'takeaway' : 'dine_in'),
                 'status'          => 'pending',
                 'guests'          => $request->guests ?? 1,
                 'subtotal'        => 0,
-                'tax_rate'        => 10,
+                'tax_rate'        => $taxRate,
                 'tax_amount'      => 0,
                 'discount_amount' => 0,
                 'total'           => 0,
@@ -115,18 +119,30 @@ public function addItem(Request $request, $orderId)
     $selectedModifiers = [];
 
     if ($request->selected_modifiers && count($request->selected_modifiers) > 0) {
-        $modifiers = Modifier::whereIn('id', $request->selected_modifiers)
+        $modifiers = Modifier::with(['menuItems' => function($query) use ($menuItem) {
+            $query->where('menu_item_id', $menuItem->id);
+        }])
+            ->whereIn('id', $request->selected_modifiers)
             ->where('is_active', true)
             ->get();
 
         foreach ($modifiers as $mod) {
-            $modifierCost       += $mod->price;
+            // Get final price using new pricing logic (absolute or incremental)
+            $finalPrice = $mod->getFinalPriceForMenuItem($menuItem->id, $menuItem->price);
+            
+            // Calculate how much this modifier adds to the base price
+            $incrementAmount = $finalPrice - $menuItem->price;
+            $modifierCost += $incrementAmount;
+            
             $selectedModifiers[] = [
                 'id'         => $mod->id,
                 'group_id'   => $mod->modifier_group_id,
-                'group_name' => $mod->group_name,
                 'name'       => $mod->name,
-                'price'      => (float) $mod->price,
+                'price'      => $incrementAmount, // Store increment amount
+                'final_price' => $finalPrice,    // Store final price for display
+                'pricing_type' => $mod->menuItems()
+                    ->where('menu_item_id', $menuItem->id)
+                    ->first()?->pivot->pricing_type ?? 'absolute',
             ];
         }
     }
@@ -625,6 +641,13 @@ public function updateServiceCharge(Request $request, $id)
 
     $order = Order::findOrFail($id);
 
+    // Only allow service charge updates for table orders (not direct orders)
+    if (is_null($order->table_id)) {
+        return response()->json([
+            'message' => 'Service charge cannot be modified for direct orders'
+        ], 422);
+    }
+
     $taxRate   = (float) $request->tax_rate;
     $taxAmount = round($order->subtotal * ($taxRate / 100), 2);
     $total     = round($order->subtotal + $taxAmount - $order->discount_amount, 2);
@@ -637,6 +660,28 @@ public function updateServiceCharge(Request $request, $id)
 
     return response()->json($this->orderWithItems($id));
 }
+
+    /**
+     * Remove an order item completely
+     * DELETE /api/orders/{id}/items/{itemId}
+     */
+    public function removeItem($id, $itemId)
+    {
+        $order = Order::findOrFail($id);
+        $item = $order->items()->findOrFail($itemId);
+
+        // Only allow removing items that haven't been sent to kitchen
+        if ($item->kot_round) {
+            return response()->json([
+                'message' => 'Cannot remove item that has been sent to kitchen'
+            ], 422);
+        }
+
+        $item->delete();
+        $order->recalculate($order->tax_rate);
+
+        return response()->json($this->orderWithItems($id));
+    }
 
     /**
      * Get kitchen items for specific table
@@ -681,6 +726,61 @@ public function updateServiceCharge(Request $request, $id)
             });
 
         return response()->json($items);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Pricing resolution
+    // ──────────────────────────────────────────────────────────────
+
+    /**
+     * Resolve the final unit price for a menu item + selected modifiers.
+     *
+     * Pricing strategy (per modifier, via pivot):
+     *
+     *   ABSOLUTE  → add the modifier's custom_price (or default price) on top of base.
+     *               e.g. Extra Cheese = Rs.150 fixed, always added as-is.
+     *
+     *   INCREMENT → add increment_price to the item's base price.
+     *               e.g. Rice base Rs.1000 + Normal portion (+200) = Rs.1200
+     *                    Koththu base Rs.800 + Full portion (+200) = Rs.1000
+     *
+     * @param  MenuItem $menuItem
+     * @param  int[]    $selectedModifierIds
+     * @return float    Final unit price to charge.
+     */
+    private function resolveUnitPrice(MenuItem $menuItem, array $selectedModifierIds): float
+    {
+        if (empty($selectedModifierIds)) {
+            return (float) $menuItem->price;
+        }
+
+        // Delegate to model — all pivot logic lives there
+        return $menuItem->computeFinalPrice($selectedModifierIds);
+    }
+
+    /**
+     * GET /menu/items/{item}/price-preview
+     *
+     * Returns the computed price for a given set of modifier selections,
+     * used by the frontend modifier picker to show live total.
+     *
+     * Query params: ?modifiers[]=45&modifiers[]=67
+     */
+    public function pricePreview(Request $request, MenuItem $item)
+    {
+        $selectedModifiers = $request->input('modifiers', []);
+
+        // Cast to int[]
+        $selectedModifiers = array_map('intval', (array) $selectedModifiers);
+
+        $unitPrice = $this->resolveUnitPrice($item, $selectedModifiers);
+
+        return response()->json([
+            'menu_item_id' => $item->id,
+            'base_price'   => (float) $item->price,
+            'unit_price'   => $unitPrice,
+            'modifier_ids' => $selectedModifiers,
+        ]);
     }
 
 

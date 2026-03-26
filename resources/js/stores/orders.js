@@ -142,6 +142,19 @@ export const useOrderStore = defineStore('orders', () => {
     }
   }
 
+  // ── removeItem ────────────────────────────────────────
+  async function removeItem(orderId, itemId) {
+    try {
+      const { data } = await axios.delete(`/orders/${orderId}/items/${itemId}`)
+      const order = data.order ?? data
+      setOrder(order)
+      return data
+    } catch (e) {
+      console.error('❌ removeItem failed:', e.response?.data ?? e.message)
+      throw e
+    }
+  }
+
   // ── sendKOT ───────────────────────────────────────────
   async function sendKOT(orderId) {
     try {
@@ -207,6 +220,7 @@ export const useOrderStore = defineStore('orders', () => {
     addItem,
     updateItemQty,
     voidItem,
+    removeItem,
     sendKOT,
     updateStatus,
     processPayment,

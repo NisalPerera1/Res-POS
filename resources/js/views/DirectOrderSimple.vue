@@ -35,6 +35,35 @@
         </div>
       </div>
 
+      <!-- Pending Direct Orders (shown when current order exists) -->
+      <div v-if="currentOrder && pendingDirectOrders.length > 0" 
+           style="border-bottom:1px solid #252B38; flex-shrink:0;">
+        <div style="padding:10px 14px; background:#12151C;">
+          <div style="font-size:11px; font-weight:600; color:#64748B; margin-bottom:8px;">
+            OTHER DIRECT ORDERS
+          </div>
+          <div style="display:flex; gap:6px; overflow-x:auto;">
+            <button
+              v-for="order in pendingDirectOrders" :key="order.id"
+              @click="switchToOrder(order)"
+              style="padding:8px 12px; border-radius:8px; font-size:11px; font-weight:500;
+                     border:1px solid #252B38; background:#1A1E28; color:#94A3B8;
+                     cursor:pointer; transition:all 0.15s; flex-shrink:0; min-width:120px;"
+              @mouseenter="e => e.currentTarget.style.background='#252B38'"
+              @mouseleave="e => e.currentTarget.style.background='#1A1E28'"
+            >
+              <div style="font-weight:600; color:#F1F5F9;">{{ order.order_number }}</div>
+              <div style="font-size:10px; color:#64748B;">
+                {{ order.items?.length || 0 }} items · Rs. {{ parseFloat(order.total || 0).toFixed(0) }}
+              </div>
+              <div style="font-size:9px; color:#10B981;">
+                {{ order.customer_name || 'Walk-in' }}
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Category Bar -->
       <div style="display:flex; gap:8px; padding:10px 14px; border-bottom:1px solid #252B38;
                   overflow-x:auto; flex-shrink:0;">
@@ -151,14 +180,22 @@
       </div>
 
       <!-- Cart Header -->
-      <div style="padding:10px 14px; border-bottom:1px solid #252B38; flex-shrink:0;">
-        <div style="display:flex; align-items:center; justify-content:space-between;">
-          <div style="font-size:11px; color:#64748B;">
-            {{ totalItemCount }} item(s) · Round {{ currentRound }}
-          </div>
-          <button @click="refreshOrder"
-            style="background:none; border:none; color:#64748B; font-size:12px; cursor:pointer;">🔄</button>
+      <div style="padding:16px 20px; border-bottom:1px solid #252B38; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <h2 style="margin:0; font-size:18px; font-weight:700; color:#F1F5F9;">
+            Direct Order
+          </h2>
+          <button v-if="currentOrder"
+            @click="createNewOrder"
+            style="padding:6px 12px; background:#10B981; color:white; border:none; border-radius:6px;
+                   font-size:11px; font-weight:600; cursor:pointer; transition:all 0.15s;"
+            @mouseenter="e => e.currentTarget.style.background='#059669'"
+            @mouseleave="e => e.currentTarget.style.background='#10B981'"
+          >
+            + New Order
+          </button>
         </div>
+        <button @click="$emit('close')" style="background:none; border:none; color:#64748B; cursor:pointer; font-size:20px;">×</button>
       </div>
 
       <!-- Cart Items -->
@@ -188,6 +225,14 @@
               <div style="font-size:11px; color:#64748B; min-width:44px; text-align:right;">
                 Rs. {{ parseFloat(item.total_price).toFixed(2) }}
               </div>
+              <button @click="removeItem(item)"
+                style="background:none; border:none; color:#EF4444; cursor:pointer;
+                       font-size:14px; padding:2px; border-radius:4px; transition:all 0.15s;"
+                @mouseenter="e => e.currentTarget.style.background='rgba(239,68,68,0.1)'"
+                @mouseleave="e => e.currentTarget.style.background='transparent'"
+                title="Remove item">
+                ×
+              </button>
             </div>
           </div>
         </template>
@@ -288,6 +333,7 @@ const modifierItem   = ref(null)
 const toast          = ref({ show: false, message: '', type: 'success' })
 const selectedType   = ref('takeaway')
 const customerName  = ref('')
+const pendingDirectOrders = ref([])
 
 // Order types
 const orderTypes = [
@@ -367,6 +413,8 @@ async function updateOrderType(type) {
 async function addItem(menuItem) {
   if (!currentOrder.value || !menuItem.is_available) return
 
+  console.log('Adding item:', menuItem) // Debug log
+  
   const hasModifiers = menuItem.modifier_groups && menuItem.modifier_groups.length > 0
   if (hasModifiers) {
     modifierItem.value = menuItem
@@ -374,33 +422,116 @@ async function addItem(menuItem) {
   }
 
   try {
-    await orderStore.addItem(currentOrder.value.id, {
+    const payload = {
       menu_item_id: menuItem.id,
       quantity:     1,
       is_instant:   menuItem.is_instant,
-    })
+    }
+    
+    console.log('Sending payload:', payload) // Debug log
+    
+    await orderStore.addItem(currentOrder.value.id, payload)
 
     if (menuItem.is_instant) {
       showToast(`${menuItem.name} added ⚡`, 'success')
     }
+    
+    // Reload pending orders to update the list
+    await loadPendingDirectOrders()
   } catch (e) {
+    console.error('AddItem error:', e.response?.data) // Debug log
     showToast('Failed to add item', 'error')
   }
 }
 
 async function onModifierConfirm(payload) {
+  console.log('Modifier payload:', payload) // Debug log
+  
   modifierItem.value = null
+  
   try {
-    await orderStore.addItem(currentOrder.value.id, {
-      menu_item_id:       payload.menu_item_id,
-      quantity:           payload.quantity,
+    const payloadData = {
+      menu_item_id: payload.menu_item_id,  // Fixed: was payload.menuItemId
+      quantity:     payload.quantity,
       selected_modifiers: payload.selected_modifiers,
-      notes:              payload.notes,
-      is_instant:         payload.is_instant,
-    })
-    showToast('Added to cart ✓', 'success')
+      notes:         payload.notes,
+      is_instant:   payload.is_instant,
+    }
+    
+    console.log('Sending modifier payload:', payloadData) // Debug log
+    
+    await orderStore.addItem(currentOrder.value.id, payloadData)
+
+    if (payload.is_instant) {
+      showToast(`${modifierItem.value?.name || 'Item'} added ⚡`, 'success')
+    }
+    
+    // Reload pending orders to update the list
+    await loadPendingDirectOrders()
   } catch (e) {
+    console.error('Modifier confirm error:', e.response?.data) // Debug log
     showToast('Failed to add item', 'error')
+  }
+}
+
+async function removeItem(item) {
+  if (!currentOrder.value || !item) return
+  
+  try {
+    await orderStore.removeItem(currentOrder.value.id, item.id)
+    showToast(`${item.item_name} removed`, 'success')
+    
+    // Reload pending orders to update the list
+    await loadPendingDirectOrders()
+  } catch (e) {
+    showToast('Failed to remove item', 'error')
+    console.error('Remove item error:', e)
+  }
+}
+
+async function loadPendingDirectOrders() {
+  try {
+    const { data } = await axios.get('/direct-orders/pending')
+    // Filter out current order from pending list
+    pendingDirectOrders.value = data.filter(order => 
+      order.id !== currentOrder.value?.id
+    )
+  } catch (e) {
+    console.error('Failed to load pending orders:', e)
+  }
+}
+
+async function switchToOrder(order) {
+  if (!order || order.id === currentOrder.value?.id) return
+  
+  try {
+    // Load the full order details
+    await orderStore.fetchOrder(order.id)
+    showToast(`Switched to ${order.order_number}`, 'success')
+    
+    // Reload pending orders to update the list
+    await loadPendingDirectOrders()
+  } catch (e) {
+    showToast('Failed to switch order', 'error')
+    console.error('Switch order error:', e)
+  }
+}
+
+async function createNewOrder() {
+  try {
+    // Clear current order
+    orderStore.clearOrder()
+    
+    // Create new direct order
+    await createNewDirectOrder()
+    
+    // Reload pending orders
+    await loadPendingDirectOrders()
+    
+    showToast('New direct order created', 'success')
+  } catch (e) {
+    showToast('Failed to create new order', 'error')
+    console.error('Create new order error:', e)
   }
 }
 
@@ -471,6 +602,9 @@ onMounted(async () => {
       orderStore.clearOrder()
     }
   }
+  
+  // Load pending direct orders
+  await loadPendingDirectOrders()
   
   loading.value = false
 })

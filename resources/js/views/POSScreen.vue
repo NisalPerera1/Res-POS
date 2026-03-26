@@ -687,6 +687,10 @@ async function saveNotes() {
 async function onPaid() {
   showPayment.value = false
   orderStore.clearOrder()
+  
+  // Refresh tables data to get updated status and revenue
+  await loadTables()
+  
   router.push('/')
 }
 

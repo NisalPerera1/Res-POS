@@ -66,6 +66,12 @@
                      font-size:11px; cursor:pointer; font-weight:600;">Delete</button>
           </div>
         </div>
+
+        <div v-if="categories.length === 0"
+          style="padding:60px; text-align:center; color:#64748B;">
+          <div style="font-size:40px; opacity:0.3; margin-bottom:12px;">📂</div>
+          <div style="font-size:14px;">No categories yet</div>
+        </div>
       </div>
     </div>
 
@@ -76,7 +82,7 @@
       <!-- Filter bar -->
       <div style="padding:10px 16px; border-bottom:1px solid #252B38;
                   display:flex; gap:8px; align-items:center; flex-shrink:0;">
-        <select v-model="selectedCategory" @change="filterItems"
+        <select v-model="selectedCategory"
           style="padding:6px 10px; background:#1A1E28; border:1px solid #252B38;
                  border-radius:7px; color:#F1F5F9; font-size:13px; outline:none;">
           <option value="">All Categories</option>
@@ -84,15 +90,13 @@
         </select>
         <input v-model="searchQuery" placeholder="Search items..."
           style="flex:1; padding:6px 10px; background:#1A1E28; border:1px solid #252B38;
-                 border-radius:7px; color:#F1F5F9; font-size:13px; outline:none;
-                 max-width:220px;"
+                 border-radius:7px; color:#F1F5F9; font-size:13px; outline:none; max-width:220px;"
           @focus="e => e.target.style.borderColor='#F59E0B'"
           @blur="e => e.target.style.borderColor='#252B38'"
         />
         <button @click="openItemModal(null)"
           style="padding:7px 14px; background:#10B981; color:#fff; border:none;
-                 border-radius:7px; font-size:12px; font-weight:600; cursor:pointer;
-                 margin-left:auto;">
+                 border-radius:7px; font-size:12px; font-weight:600; cursor:pointer; margin-left:auto;">
           + Add Item
         </button>
       </div>
@@ -103,26 +107,22 @@
           <div v-for="item in filteredItems" :key="item.id"
             style="background:#1A1E28; border:1px solid #252B38; border-radius:10px; padding:14px;">
 
-            <!-- Item header -->
             <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:10px;">
               <div style="flex:1; min-width:0;">
                 <div style="font-size:14px; font-weight:700; color:#F1F5F9; white-space:nowrap;
                              overflow:hidden; text-overflow:ellipsis;">{{ item.name }}</div>
                 <div style="font-size:15px; font-weight:700; color:#F59E0B; margin-top:2px;">
-                  ${{ parseFloat(item.price).toFixed(2) }}
+                  Rs.{{ parseFloat(item.price).toFixed(2) }}
                 </div>
               </div>
               <div style="font-size:28px; margin-left:8px; flex-shrink:0;">{{ item.icon ?? '🍽️' }}</div>
             </div>
 
-            <!-- Description -->
             <div style="font-size:11px; color:#64748B; margin-bottom:10px; line-height:1.4;
-                        overflow:hidden; display:-webkit-box; -webkit-line-clamp:2;
-                        -webkit-box-orient:vertical;">
+                        overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">
               {{ item.description || 'No description' }}
             </div>
 
-            <!-- Badges -->
             <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;">
               <span style="font-size:10px; font-weight:600; padding:2px 7px; border-radius:4px;"
                 :style="{
@@ -133,14 +133,10 @@
               </span>
               <span v-if="item.is_popular"
                 style="font-size:10px; font-weight:600; padding:2px 7px; border-radius:4px;
-                       background:rgba(245,158,11,0.1); color:#F59E0B;">
-                ★ Popular
-              </span>
+                       background:rgba(245,158,11,0.1); color:#F59E0B;">★ Popular</span>
               <span v-if="item.is_instant"
                 style="font-size:10px; font-weight:600; padding:2px 7px; border-radius:4px;
-                       background:rgba(16,185,129,0.1); color:#10B981;">
-                ⚡ Instant
-              </span>
+                       background:rgba(16,185,129,0.1); color:#10B981;">⚡ Instant</span>
               <span v-if="item.modifier_groups?.length > 0"
                 style="font-size:10px; font-weight:600; padding:2px 7px; border-radius:4px;
                        background:rgba(139,92,246,0.1); color:#8B5CF6;">
@@ -148,44 +144,34 @@
               </span>
             </div>
 
-            <!-- Modifier group chips -->
-            <div v-if="item.modifier_groups?.length > 0"
-              style="display:flex; flex-wrap:wrap; gap:3px; margin-bottom:10px;">
+            <div style="display:flex; flex-wrap:wrap; gap:3px; margin-bottom:10px;"
+              v-if="item.modifier_groups?.length > 0">
               <span v-for="g in item.modifier_groups" :key="g.id"
-                style="font-size:9px; padding:2px 6px; border-radius:4px;
-                       background:#252B38; color:#64748B;">
+                style="font-size:9px; padding:2px 6px; border-radius:4px; background:#252B38; color:#64748B;">
                 {{ g.name }}{{ g.is_required ? ' *' : '' }}
               </span>
             </div>
 
-            <!-- Actions -->
             <div style="display:flex; gap:6px;">
               <button @click="openItemModal(item)"
                 style="flex:2; padding:7px; background:rgba(59,130,246,0.12); color:#3B82F6;
                        border:1px solid rgba(59,130,246,0.3); border-radius:6px;
-                       font-size:11px; font-weight:600; cursor:pointer;">
-                ✏️ Edit
-              </button>
+                       font-size:11px; font-weight:600; cursor:pointer;">✏️ Edit</button>
               <button @click="toggleAvailability(item)"
-                style="flex:1; padding:7px; border-radius:6px; font-size:11px;
-                       font-weight:600; cursor:pointer; border:1px solid;"
+                style="flex:1; padding:7px; border-radius:6px; font-size:11px; font-weight:600;
+                       cursor:pointer; border:1px solid;"
                 :style="{
-                  background:   item.is_available ? 'rgba(239,68,68,0.1)'  : 'rgba(16,185,129,0.1)',
-                  color:        item.is_available ? '#EF4444'               : '#10B981',
-                  borderColor:  item.is_available ? 'rgba(239,68,68,0.3)'  : 'rgba(16,185,129,0.3)',
-                }">
-                {{ item.is_available ? 'Off' : 'On' }}
-              </button>
+                  background:  item.is_available ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
+                  color:       item.is_available ? '#EF4444' : '#10B981',
+                  borderColor: item.is_available ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)',
+                }">{{ item.is_available ? 'Off' : 'On' }}</button>
               <button @click="deleteItem(item)"
                 style="flex:1; padding:7px; background:rgba(239,68,68,0.1); color:#EF4444;
                        border:1px solid rgba(239,68,68,0.2); border-radius:6px;
-                       font-size:11px; font-weight:600; cursor:pointer;">
-                🗑️
-              </button>
+                       font-size:11px; font-weight:600; cursor:pointer;">🗑️</button>
             </div>
           </div>
 
-          <!-- Empty state -->
           <div v-if="filteredItems.length === 0"
             style="grid-column:1/-1; padding:60px; text-align:center; color:#64748B;">
             <div style="font-size:40px; opacity:0.3; margin-bottom:12px;">🍽️</div>
@@ -207,9 +193,7 @@
           <div style="font-size:13px; font-weight:600; color:#F1F5F9;">Groups</div>
           <button @click="openGroupModal(null)"
             style="padding:4px 10px; background:#10B981; color:#fff; border:none;
-                   border-radius:6px; font-size:11px; font-weight:600; cursor:pointer;">
-            + Add
-          </button>
+                   border-radius:6px; font-size:11px; font-weight:600; cursor:pointer;">+ Add</button>
         </div>
 
         <div style="flex:1; overflow-y:auto; padding:8px;">
@@ -218,8 +202,8 @@
             style="padding:10px 12px; border-radius:8px; cursor:pointer;
                    margin-bottom:4px; transition:all 0.15s; border:1px solid;"
             :style="{
-              background:   selectedGroup?.id === group.id ? 'rgba(245,158,11,0.1)' : '#1A1E28',
-              borderColor:  selectedGroup?.id === group.id ? '#F59E0B'              : '#252B38',
+              background:  selectedGroup?.id === group.id ? 'rgba(245,158,11,0.1)' : '#1A1E28',
+              borderColor: selectedGroup?.id === group.id ? '#F59E0B' : '#252B38',
             }"
           >
             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -227,28 +211,21 @@
               <div style="font-size:10px; padding:1px 6px; border-radius:4px;"
                 :style="{
                   background: group.is_required ? 'rgba(239,68,68,0.1)' : 'rgba(100,116,139,0.1)',
-                  color:      group.is_required ? '#EF4444'             : '#64748B',
-                }">
-                {{ group.is_required ? 'Required' : 'Optional' }}
-              </div>
+                  color:      group.is_required ? '#EF4444' : '#64748B',
+                }">{{ group.is_required ? 'Required' : 'Optional' }}</div>
             </div>
             <div style="font-size:11px; color:#64748B; margin-top:3px;">
-              {{ group.modifiers?.length ?? 0 }} options ·
-              Pick {{ group.min_select }}–{{ group.max_select }}
+              {{ group.modifiers?.length ?? 0 }} options · Pick {{ group.min_select }}–{{ group.max_select }}
             </div>
           </div>
 
           <div v-if="modifierGroups.length === 0"
-            style="text-align:center; padding:40px 16px; color:#64748B; font-size:13px;">
-            No groups yet
-          </div>
+            style="text-align:center; padding:40px 16px; color:#64748B; font-size:13px;">No groups yet</div>
         </div>
       </div>
 
-      <!-- Right: group detail + modifiers -->
+      <!-- Right: group detail -->
       <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
-
-        <!-- No group selected -->
         <div v-if="!selectedGroup"
           style="flex:1; display:flex; flex-direction:column; align-items:center;
                  justify-content:center; color:#64748B; gap:8px;">
@@ -257,7 +234,6 @@
         </div>
 
         <template v-else>
-          <!-- Group header -->
           <div style="padding:12px 16px; border-bottom:1px solid #252B38; flex-shrink:0;">
             <div style="display:flex; align-items:center; justify-content:space-between;">
               <div>
@@ -271,45 +247,34 @@
                 <button @click="openGroupModal(selectedGroup)"
                   style="padding:6px 12px; background:rgba(59,130,246,0.12); color:#3B82F6;
                          border:1px solid rgba(59,130,246,0.3); border-radius:6px;
-                         font-size:11px; font-weight:600; cursor:pointer;">
-                  Edit Group
-                </button>
+                         font-size:11px; font-weight:600; cursor:pointer;">Edit Group</button>
                 <button @click="deleteGroup(selectedGroup)"
                   style="padding:6px 12px; background:rgba(239,68,68,0.1); color:#EF4444;
                          border:1px solid rgba(239,68,68,0.2); border-radius:6px;
-                         font-size:11px; font-weight:600; cursor:pointer;">
-                  Delete Group
-                </button>
+                         font-size:11px; font-weight:600; cursor:pointer;">Delete Group</button>
               </div>
             </div>
           </div>
 
-          <!-- Modifiers list -->
           <div style="flex:1; overflow-y:auto; padding:12px 16px;">
-
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <div style="font-size:13px; font-weight:600; color:#F1F5F9;">
                 Options ({{ selectedGroup.modifiers?.length ?? 0 }})
               </div>
               <button @click="openModifierModal(null)"
                 style="padding:5px 12px; background:#10B981; color:#fff; border:none;
-                       border-radius:6px; font-size:11px; font-weight:600; cursor:pointer;">
-                + Add Option
-              </button>
+                       border-radius:6px; font-size:11px; font-weight:600; cursor:pointer;">+ Add Option</button>
             </div>
 
             <div style="display:flex; flex-direction:column; gap:6px;">
               <div v-for="mod in selectedGroup.modifiers" :key="mod.id"
                 style="display:flex; align-items:center; justify-content:space-between;
-                       padding:10px 12px; background:#1A1E28; border:1px solid #252B38;
-                       border-radius:8px;">
-                <div style="display:flex; align-items:center; gap:10px; flex:1;">
-                  <div>
-                    <div style="font-size:13px; font-weight:500; color:#F1F5F9;">{{ mod.name }}</div>
-                    <div style="font-size:11px; margin-top:1px;"
-                      :style="{ color: mod.price > 0 ? '#F59E0B' : '#64748B' }">
-                      {{ mod.price > 0 ? '+$' + parseFloat(mod.price).toFixed(2) : 'Included' }}
-                    </div>
+                       padding:10px 12px; background:#1A1E28; border:1px solid #252B38; border-radius:8px;">
+                <div>
+                  <div style="font-size:13px; font-weight:500; color:#F1F5F9;">{{ mod.name }}</div>
+                  <div style="font-size:11px; margin-top:1px;"
+                    :style="{ color: mod.price > 0 ? '#F59E0B' : '#64748B' }">
+                    {{ mod.price > 0 ? '+Rs.' + parseFloat(mod.price).toFixed(2) : 'Included' }}
                   </div>
                 </div>
                 <div style="display:flex; gap:5px; align-items:center;">
@@ -317,9 +282,7 @@
                     :style="{
                       background: mod.is_active ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
                       color:      mod.is_active ? '#10B981' : '#EF4444',
-                    }">
-                    {{ mod.is_active ? 'Active' : 'Inactive' }}
-                  </div>
+                    }">{{ mod.is_active ? 'Active' : 'Inactive' }}</div>
                   <button @click="openModifierModal(mod)"
                     style="padding:4px 10px; background:rgba(59,130,246,0.1); color:#3B82F6;
                            border:1px solid rgba(59,130,246,0.2); border-radius:5px;
@@ -341,9 +304,203 @@
       </div>
     </div>
 
-    <!-- ════════════════════════════════════════════
-         MODALS
-    ════════════════════════════════════════════ -->
+    <!-- ══════════ MODIFIER PRICING TAB ══════════ -->
+    <div v-if="activeTab === 'pricing'"
+      style="flex:1; display:flex; overflow:hidden;">
+
+      <!-- Left: item selector -->
+      <div style="width:280px; border-right:1px solid #252B38; display:flex;
+                  flex-direction:column; flex-shrink:0;">
+        <div style="padding:10px 12px; border-bottom:1px solid #252B38;">
+          <input v-model="pricingItemSearch" placeholder="Search items..."
+            style="width:100%; padding:7px 10px; background:#12151C; border:1px solid #252B38;
+                   border-radius:7px; color:#F1F5F9; font-size:13px; outline:none;"
+            @focus="e => e.target.style.borderColor='#F59E0B'"
+            @blur="e => e.target.style.borderColor='#252B38'" />
+        </div>
+
+        <div style="flex:1; overflow-y:auto; padding:8px;">
+          <div style="font-size:10px; color:#64748B; text-transform:uppercase;
+                      letter-spacing:0.06em; padding:4px 6px 8px;">Items with modifiers</div>
+
+          <div v-for="item in pricingEligibleItems" :key="item.id"
+            @click="selectItemForPricing(item)"
+            style="padding:10px 12px; border-radius:8px; cursor:pointer;
+                   margin-bottom:4px; border:1px solid; transition:all 0.15s;"
+            :style="{
+              background:  selectedItemForPricing?.id === item.id ? 'rgba(245,158,11,0.1)' : '#1A1E28',
+              borderColor: selectedItemForPricing?.id === item.id ? '#F59E0B' : '#252B38',
+            }"
+          >
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:20px;">{{ item.icon ?? '🍽️' }}</span>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:13px; font-weight:600; color:#F1F5F9;
+                            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ item.name }}</div>
+                <div style="font-size:11px; color:#64748B; margin-top:1px;">
+                  Base: Rs.{{ parseFloat(item.price).toFixed(2) }} ·
+                  {{ item.modifier_groups?.length ?? 0 }} group{{ item.modifier_groups?.length === 1 ? '' : 's' }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="pricingEligibleItems.length === 0"
+            style="padding:30px 16px; text-align:center; color:#64748B; font-size:12px;">
+            No items with modifier groups.<br>
+            <span style="opacity:0.6;">Attach modifier groups to items first.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: pricing matrix -->
+      <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+
+        <div v-if="!selectedItemForPricing"
+          style="flex:1; display:flex; flex-direction:column; align-items:center;
+                 justify-content:center; color:#64748B; gap:10px;">
+          <div style="font-size:48px; opacity:0.15;">💰</div>
+          <div style="font-size:14px; font-weight:600;">Select an item to configure modifier pricing</div>
+          <div style="font-size:12px; opacity:0.6;">Set per-item increment or absolute prices for each modifier option</div>
+        </div>
+
+        <template v-else>
+          <!-- Header -->
+          <div style="padding:14px 18px; border-bottom:1px solid #252B38; flex-shrink:0;
+                      display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:24px;">{{ selectedItemForPricing.icon ?? '🍽️' }}</span>
+              <div>
+                <div style="font-size:16px; font-weight:700; color:#F1F5F9;">{{ selectedItemForPricing.name }}</div>
+                <div style="font-size:12px; color:#64748B; margin-top:1px;">
+                  Base price: <span style="color:#F59E0B; font-weight:700;">
+                    Rs.{{ parseFloat(selectedItemForPricing.price).toFixed(2) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <button @click="saveModifierPricing" :disabled="pricingSaving"
+              style="padding:9px 20px; background:#F59E0B; color:#000; border:none;
+                     border-radius:8px; cursor:pointer; font-weight:700; font-size:13px;
+                     opacity:1; transition:opacity 0.15s;"
+              :style="{ opacity: pricingSaving ? 0.6 : 1 }">
+              {{ pricingSaving ? '⏳ Saving…' : '💾 Save Pricing' }}
+            </button>
+          </div>
+
+          <!-- Legend -->
+          <div style="padding:8px 18px; background:rgba(245,158,11,0.05);
+                      border-bottom:1px solid #252B38; flex-shrink:0;
+                      display:flex; gap:20px; align-items:center;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div style="width:10px; height:10px; border-radius:2px; background:#8B5CF6;"></div>
+              <span style="font-size:11px; color:#94A3B8;">
+                <b style="color:#F1F5F9;">Increment</b> — adds to base price
+              </span>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div style="width:10px; height:10px; border-radius:2px; background:#3B82F6;"></div>
+              <span style="font-size:11px; color:#94A3B8;">
+                <b style="color:#F1F5F9;">Absolute</b> — fixed add-on regardless of base
+              </span>
+            </div>
+          </div>
+
+          <!-- Pricing rows -->
+          <div style="flex:1; overflow-y:auto; padding:14px 18px;">
+            <div v-if="pricingLoading"
+              style="padding:40px; text-align:center; color:#64748B; font-size:13px;">
+              Loading modifier pricing…
+            </div>
+
+            <template v-else>
+              <div v-for="group in selectedItemForPricing.modifier_groups" :key="group.id"
+                style="margin-bottom:20px;">
+
+                <!-- Group label -->
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                  <div style="font-size:12px; font-weight:700; color:#F1F5F9;
+                              text-transform:uppercase; letter-spacing:0.06em;">{{ group.name }}</div>
+                  <div style="font-size:10px; padding:2px 7px; border-radius:4px;"
+                    :style="{
+                      background: group.is_required ? 'rgba(239,68,68,0.1)' : 'rgba(100,116,139,0.1)',
+                      color:      group.is_required ? '#EF4444' : '#64748B',
+                    }">{{ group.is_required ? 'Required' : 'Optional' }}</div>
+                  <div style="flex:1; height:1px; background:#252B38;"></div>
+                </div>
+
+                <!-- Modifier rows -->
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <div v-for="mod in group.modifiers" :key="mod.id"
+                    style="display:grid; grid-template-columns:1fr 160px 160px 120px;
+                           gap:8px; align-items:center;
+                           padding:10px 12px; background:#1A1E28; border:1px solid #252B38;
+                           border-radius:8px;">
+
+                    <!-- Name + default -->
+                    <div>
+                      <div style="font-size:13px; font-weight:500; color:#F1F5F9;">{{ mod.name }}</div>
+                      <div style="font-size:11px; color:#64748B; margin-top:1px;">
+                        Default: Rs.{{ parseFloat(mod.price ?? 0).toFixed(2) }}
+                      </div>
+                    </div>
+
+                    <!-- Type toggle -->
+                    <div style="display:flex; border-radius:7px; overflow:hidden; border:1px solid #252B38;">
+                      <button @click="setPricingType(mod.id, 'increment')"
+                        style="flex:1; padding:6px 4px; font-size:10px; font-weight:700;
+                               border:none; cursor:pointer; transition:all 0.15s;"
+                        :style="{
+                          background: getModifierPricing(mod.id).pricing_type === 'increment' ? '#8B5CF6' : '#12151C',
+                          color:      getModifierPricing(mod.id).pricing_type === 'increment' ? '#fff' : '#64748B',
+                        }">INC</button>
+                      <button @click="setPricingType(mod.id, 'absolute')"
+                        style="flex:1; padding:6px 4px; font-size:10px; font-weight:700;
+                               border:none; cursor:pointer; transition:all 0.15s;"
+                        :style="{
+                          background: getModifierPricing(mod.id).pricing_type === 'absolute' ? '#3B82F6' : '#12151C',
+                          color:      getModifierPricing(mod.id).pricing_type === 'absolute' ? '#fff' : '#64748B',
+                        }">ABS</button>
+                    </div>
+
+                    <!-- Price input -->
+                    <div style="position:relative;">
+                      <span style="position:absolute; left:9px; top:50%; transform:translateY(-50%);
+                                   font-size:10px; color:#64748B; pointer-events:none;">Rs.</span>
+                      <input
+                        :value="getPricingValue(mod.id)"
+                        @input="e => setPricingValue(mod.id, e.target.value)"
+                        type="number" min="0" step="1" placeholder="0"
+                        style="width:100%; padding:7px 8px 7px 30px; background:#12151C;
+                               border:1px solid #252B38; border-radius:7px; color:#F59E0B;
+                               font-size:14px; font-weight:700; outline:none;"
+                        @focus="e => e.target.style.borderColor='#F59E0B'"
+                        @blur="e => e.target.style.borderColor='#252B38'"
+                      />
+                    </div>
+
+                    <!-- Final price preview -->
+                    <div style="text-align:right;">
+                      <div style="font-size:10px; color:#64748B; margin-bottom:2px;">Final price</div>
+                      <div style="font-size:14px; font-weight:700; color:#10B981;">
+                        Rs.{{ computePreviewPrice(mod.id) }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="!selectedItemForPricing.modifier_groups?.length"
+                style="padding:40px; text-align:center; color:#64748B; font-size:13px;">
+                This item has no modifier groups attached.
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- ════════════════ MODALS ════════════════ -->
 
     <!-- Category Modal -->
     <Teleport to="body">
@@ -379,9 +536,7 @@
           <div style="display:flex; gap:8px; margin-top:18px; justify-content:flex-end;">
             <button @click="showCategoryModal = false"
               style="padding:9px 16px; background:transparent; color:#64748B;
-                     border:1px solid #252B38; border-radius:8px; cursor:pointer; font-size:13px;">
-              Cancel
-            </button>
+                     border:1px solid #252B38; border-radius:8px; cursor:pointer; font-size:13px;">Cancel</button>
             <button @click="saveCategory"
               style="padding:9px 20px; background:#F59E0B; color:#000; border:none;
                      border-radius:8px; cursor:pointer; font-weight:700; font-size:13px;">
@@ -400,14 +555,13 @@
         @click.self="showItemModal = false">
         <div style="background:#1A1E28; border:1px solid #252B38; border-radius:14px;
                     padding:22px; width:520px; max-height:90vh; overflow-y:auto;">
-
           <div style="font-size:16px; font-weight:700; color:#F1F5F9; margin-bottom:18px;">
             {{ editingItem ? 'Edit Menu Item' : 'New Menu Item' }}
           </div>
 
           <div style="display:flex; flex-direction:column; gap:14px;">
 
-            <!-- Name + Icon row -->
+            <!-- Name + Icon -->
             <div style="display:flex; gap:12px;">
               <div style="flex:1;">
                 <label style="font-size:11px; color:#64748B; display:block; margin-bottom:5px;
@@ -429,11 +583,11 @@
               </div>
             </div>
 
-            <!-- Price + Category row -->
+            <!-- Price + Category -->
             <div style="display:flex; gap:12px;">
               <div style="flex:1;">
                 <label style="font-size:11px; color:#64748B; display:block; margin-bottom:5px;
-                               text-transform:uppercase; letter-spacing:0.05em;">Price *</label>
+                               text-transform:uppercase; letter-spacing:0.05em;">Price (Rs.) *</label>
                 <input v-model.number="itemForm.price" type="number" step="0.01" placeholder="0.00"
                   style="width:100%; padding:9px 12px; background:#12151C; border:1px solid #252B38;
                          border-radius:8px; color:#F59E0B; font-size:15px; font-weight:700; outline:none;"
@@ -464,7 +618,7 @@
                 @blur="e => e.target.style.borderColor='#252B38'"></textarea>
             </div>
 
-            <!-- Prep time + Type row -->
+            <!-- Prep time + Type -->
             <div style="display:flex; gap:12px;">
               <div style="flex:1;">
                 <label style="font-size:11px; color:#64748B; display:block; margin-bottom:5px;
@@ -493,12 +647,10 @@
             <div style="display:flex; flex-wrap:wrap; gap:16px; padding:10px 0;">
               <label v-for="toggle in toggleFields" :key="toggle.key"
                 style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                <div
-                  @click="itemForm[toggle.key] = !itemForm[toggle.key]"
+                <div @click="itemForm[toggle.key] = !itemForm[toggle.key]"
                   style="width:40px; height:22px; border-radius:11px; cursor:pointer;
                          transition:background 0.2s; position:relative; flex-shrink:0;"
-                  :style="{ background: itemForm[toggle.key] ? '#F59E0B' : '#252B38' }"
-                >
+                  :style="{ background: itemForm[toggle.key] ? '#F59E0B' : '#252B38' }">
                   <div style="width:18px; height:18px; border-radius:50%; background:#fff;
                                position:absolute; top:2px; transition:left 0.2s;"
                     :style="{ left: itemForm[toggle.key] ? '20px' : '2px' }"></div>
@@ -507,7 +659,7 @@
               </label>
             </div>
 
-            <!-- ── MODIFIER GROUPS SECTION ── -->
+            <!-- Modifier groups section -->
             <div style="border-top:1px solid #252B38; padding-top:14px;">
               <div style="font-size:12px; font-weight:700; color:#F1F5F9; margin-bottom:10px;
                            text-transform:uppercase; letter-spacing:0.06em; display:flex;
@@ -518,7 +670,6 @@
                 </span>
               </div>
 
-              <!-- Available groups to attach -->
               <div style="display:flex; flex-direction:column; gap:6px;">
                 <div v-for="group in modifierGroups" :key="group.id"
                   @click="toggleGroupOnItem(group.id)"
@@ -526,36 +677,28 @@
                          padding:10px 12px; border-radius:8px; cursor:pointer;
                          border:1.5px solid; transition:all 0.15s;"
                   :style="{
-                    background:   itemForm.modifier_group_ids.includes(group.id)
-                      ? 'rgba(245,158,11,0.08)' : '#12151C',
-                    borderColor:  itemForm.modifier_group_ids.includes(group.id)
-                      ? '#F59E0B' : '#252B38',
-                  }"
-                >
+                    background:  itemForm.modifier_group_ids.includes(group.id) ? 'rgba(245,158,11,0.08)' : '#12151C',
+                    borderColor: itemForm.modifier_group_ids.includes(group.id) ? '#F59E0B' : '#252B38',
+                  }">
                   <div style="flex:1;">
                     <div style="font-size:13px; font-weight:500;"
                       :style="{ color: itemForm.modifier_group_ids.includes(group.id) ? '#F1F5F9' : '#94A3B8' }">
                       {{ group.name }}
                       <span style="font-size:10px; margin-left:6px; opacity:0.7;">
-                        {{ group.is_required ? '(required)' : '(optional)' }} ·
-                        {{ group.modifiers?.length ?? 0 }} options
+                        {{ group.is_required ? '(required)' : '(optional)' }} · {{ group.modifiers?.length ?? 0 }} options
                       </span>
                     </div>
-                    <!-- Show modifier names -->
                     <div style="font-size:10px; color:#64748B; margin-top:2px;">
-                      {{ group.modifiers?.slice(0,4).map(m => m.name).join(', ') }}
-                      {{ (group.modifiers?.length ?? 0) > 4 ? '...' : '' }}
+                      {{ group.modifiers?.slice(0,4).map(m => m.name).join(', ') }}{{ (group.modifiers?.length ?? 0) > 4 ? '...' : '' }}
                     </div>
                   </div>
-                  <!-- Checkbox indicator -->
                   <div style="width:22px; height:22px; border-radius:6px; flex-shrink:0;
                                display:flex; align-items:center; justify-content:center;
-                               font-size:12px; font-weight:700; margin-left:10px; transition:all 0.15s;"
+                               font-size:12px; font-weight:700; margin-left:10px;"
                     :style="{
                       background: itemForm.modifier_group_ids.includes(group.id) ? '#F59E0B' : '#252B38',
                       color:      itemForm.modifier_group_ids.includes(group.id) ? '#000' : '#64748B',
-                    }"
-                  >{{ itemForm.modifier_group_ids.includes(group.id) ? '✓' : '' }}</div>
+                    }">{{ itemForm.modifier_group_ids.includes(group.id) ? '✓' : '' }}</div>
                 </div>
 
                 <div v-if="modifierGroups.length === 0"
@@ -569,16 +712,12 @@
                 </div>
               </div>
             </div>
-
           </div>
 
-          <!-- Modal footer -->
           <div style="display:flex; gap:8px; margin-top:20px; justify-content:flex-end;">
             <button @click="showItemModal = false"
               style="padding:10px 18px; background:transparent; color:#64748B;
-                     border:1px solid #252B38; border-radius:8px; cursor:pointer; font-size:13px;">
-              Cancel
-            </button>
+                     border:1px solid #252B38; border-radius:8px; cursor:pointer; font-size:13px;">Cancel</button>
             <button @click="saveItem"
               style="padding:10px 24px; background:#F59E0B; color:#000; border:none;
                      border-radius:8px; cursor:pointer; font-weight:700; font-size:13px;">
@@ -597,11 +736,9 @@
         @click.self="showGroupModal = false">
         <div style="background:#1A1E28; border:1px solid #252B38; border-radius:14px;
                     padding:22px; width:420px;">
-
           <div style="font-size:16px; font-weight:700; color:#F1F5F9; margin-bottom:18px;">
             {{ editingGroup ? 'Edit Modifier Group' : 'New Modifier Group' }}
           </div>
-
           <div style="display:flex; flex-direction:column; gap:12px;">
             <div>
               <label style="font-size:11px; color:#64748B; display:block; margin-bottom:5px;
@@ -612,7 +749,6 @@
                 @focus="e => e.target.style.borderColor='#F59E0B'"
                 @blur="e => e.target.style.borderColor='#252B38'" />
             </div>
-
             <div style="display:flex; gap:12px;">
               <div style="flex:1;">
                 <label style="font-size:11px; color:#64748B; display:block; margin-bottom:5px;
@@ -633,15 +769,11 @@
                   @blur="e => e.target.style.borderColor='#252B38'" />
               </div>
             </div>
-
-            <!-- Required toggle -->
             <label style="display:flex; align-items:center; gap:10px; cursor:pointer; padding:4px 0;">
-              <div
-                @click="groupForm.is_required = !groupForm.is_required"
+              <div @click="groupForm.is_required = !groupForm.is_required"
                 style="width:40px; height:22px; border-radius:11px; cursor:pointer;
                        transition:background 0.2s; position:relative; flex-shrink:0;"
-                :style="{ background: groupForm.is_required ? '#EF4444' : '#252B38' }"
-              >
+                :style="{ background: groupForm.is_required ? '#EF4444' : '#252B38' }">
                 <div style="width:18px; height:18px; border-radius:50%; background:#fff;
                              position:absolute; top:2px; transition:left 0.2s;"
                   :style="{ left: groupForm.is_required ? '20px' : '2px' }"></div>
@@ -652,13 +784,10 @@
               </div>
             </label>
           </div>
-
           <div style="display:flex; gap:8px; margin-top:18px; justify-content:flex-end;">
             <button @click="showGroupModal = false"
               style="padding:9px 16px; background:transparent; color:#64748B;
-                     border:1px solid #252B38; border-radius:8px; cursor:pointer; font-size:13px;">
-              Cancel
-            </button>
+                     border:1px solid #252B38; border-radius:8px; cursor:pointer; font-size:13px;">Cancel</button>
             <button @click="saveGroup"
               style="padding:9px 20px; background:#F59E0B; color:#000; border:none;
                      border-radius:8px; cursor:pointer; font-weight:700; font-size:13px;">
@@ -669,7 +798,7 @@
       </div>
     </Teleport>
 
-    <!-- Modifier (Option) Modal -->
+    <!-- Modifier Option Modal -->
     <Teleport to="body">
       <div v-if="showModifierModal"
         style="position:fixed; inset:0; background:rgba(0,0,0,0.65);
@@ -677,14 +806,12 @@
         @click.self="showModifierModal = false">
         <div style="background:#1A1E28; border:1px solid #252B38; border-radius:14px;
                     padding:22px; width:380px;">
-
           <div style="font-size:16px; font-weight:700; color:#F1F5F9; margin-bottom:18px;">
             {{ editingModifier ? 'Edit Option' : 'New Option' }}
             <span style="font-size:12px; color:#64748B; font-weight:400; margin-left:6px;">
               for {{ selectedGroup?.name }}
             </span>
           </div>
-
           <div style="display:flex; flex-direction:column; gap:12px;">
             <div>
               <label style="font-size:11px; color:#64748B; display:block; margin-bottom:5px;
@@ -695,11 +822,10 @@
                 @focus="e => e.target.style.borderColor='#F59E0B'"
                 @blur="e => e.target.style.borderColor='#252B38'" />
             </div>
-
             <div>
               <label style="font-size:11px; color:#64748B; display:block; margin-bottom:5px;
                              text-transform:uppercase; letter-spacing:0.05em;">
-                Extra Price ($) — 0 = included
+                Default Price (Rs.) — 0 = included
               </label>
               <input v-model.number="modifierForm.price" type="number" step="0.01" min="0" placeholder="0.00"
                 style="width:100%; padding:9px 12px; background:#12151C; border:1px solid #252B38;
@@ -707,15 +833,11 @@
                 @focus="e => e.target.style.borderColor='#F59E0B'"
                 @blur="e => e.target.style.borderColor='#252B38'" />
             </div>
-
-            <!-- Active toggle -->
             <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
-              <div
-                @click="modifierForm.is_active = !modifierForm.is_active"
+              <div @click="modifierForm.is_active = !modifierForm.is_active"
                 style="width:40px; height:22px; border-radius:11px; cursor:pointer;
                        transition:background 0.2s; position:relative; flex-shrink:0;"
-                :style="{ background: modifierForm.is_active ? '#10B981' : '#252B38' }"
-              >
+                :style="{ background: modifierForm.is_active ? '#10B981' : '#252B38' }">
                 <div style="width:18px; height:18px; border-radius:50%; background:#fff;
                              position:absolute; top:2px; transition:left 0.2s;"
                   :style="{ left: modifierForm.is_active ? '20px' : '2px' }"></div>
@@ -723,13 +845,10 @@
               <span style="font-size:13px; color:#F1F5F9;">Active (visible to customers)</span>
             </label>
           </div>
-
           <div style="display:flex; gap:8px; margin-top:18px; justify-content:flex-end;">
             <button @click="showModifierModal = false"
               style="padding:9px 16px; background:transparent; color:#64748B;
-                     border:1px solid #252B38; border-radius:8px; cursor:pointer; font-size:13px;">
-              Cancel
-            </button>
+                     border:1px solid #252B38; border-radius:8px; cursor:pointer; font-size:13px;">Cancel</button>
             <button @click="saveModifier"
               style="padding:9px 20px; background:#F59E0B; color:#000; border:none;
                      border-radius:8px; cursor:pointer; font-weight:700; font-size:13px;">
@@ -745,7 +864,7 @@
       <div v-if="toast.show"
         style="position:fixed; bottom:24px; right:24px; z-index:200;
                padding:12px 20px; border-radius:9px; font-weight:600; font-size:13px;
-               display:flex; align-items:center; gap:8px; transition:all 0.3s;"
+               display:flex; align-items:center; gap:8px;"
         :style="{ background: toast.type === 'success' ? '#10B981' : '#EF4444', color: '#fff' }">
         {{ toast.type === 'success' ? '✅' : '⚠️' }} {{ toast.message }}
       </div>
@@ -760,89 +879,76 @@ import axios from 'axios'
 
 // ── Tabs ──────────────────────────────────────────────────
 const tabs = [
-  { value: 'categories', label: '📁 Categories'       },
-  { value: 'items',      label: '🍽️ Menu Items'       },
-  { value: 'modifiers',  label: '⚙️ Modifier Groups'  },
+  { value: 'categories', label: '📁 Categories'      },
+  { value: 'items',      label: '🍽️ Menu Items'      },
+  { value: 'modifiers',  label: '⚙️ Modifier Groups' },
+  { value: 'pricing',    label: '💰 Modifier Pricing' },
 ]
 const activeTab = ref('items')
 
-// ── Data ──────────────────────────────────────────────────
+// ── Core data ─────────────────────────────────────────────
 const categories     = ref([])
 const menuItems      = ref([])
 const modifierGroups = ref([])
 const selectedGroup  = ref(null)
 
-// ── Filters ───────────────────────────────────────────────
+// ── Filters (items tab) ───────────────────────────────────
 const selectedCategory = ref('')
 const searchQuery      = ref('')
 
-// ── Modal states ──────────────────────────────────────────
+// ── Pricing tab state ─────────────────────────────────────
+const pricingItemSearch      = ref('')
+const selectedItemForPricing = ref(null)
+const modifierPricing        = ref({})   // { [modifierId]: { pricing_type, custom_price, increment_price } }
+const pricingLoading         = ref(false)
+const pricingSaving          = ref(false)
+const allModifiers           = ref([])   // FIX: was missing — caused ReferenceError
+
+// ── Modal visibility ──────────────────────────────────────
 const showCategoryModal = ref(false)
 const showItemModal     = ref(false)
 const showGroupModal    = ref(false)
 const showModifierModal = ref(false)
 
+// ── Editing targets ───────────────────────────────────────
 const editingCategory = ref(null)
 const editingItem     = ref(null)
 const editingGroup    = ref(null)
 const editingModifier = ref(null)
 
-// ── Toast ─────────────────────────────────────────────────
-const toast = ref({ show: false, message: '', type: 'success' })
+// ── Form defaults ─────────────────────────────────────────
+const defaultItemForm = () => ({
+  name: '', description: '', price: 0, cost_price: 0,
+  category_id: '', icon: '', type: 'food', prep_time: 15,
+  is_available: true, is_popular: false, is_instant: false,
+  modifier_group_ids: [],
+})
+const defaultGroupForm    = () => ({ name: '', is_required: false, min_select: 0, max_select: 1, sort_order: 0 })
+const defaultModifierForm = () => ({ name: '', price: 0, is_active: true })
 
-function showToast(message, type = 'success') {
-  toast.value = { show: true, message, type }
-  setTimeout(() => { toast.value.show = false }, 3000)
-}
+const categoryForm = ref({ name: '', icon: '' })
+const itemForm     = ref(defaultItemForm())
+const groupForm    = ref(defaultGroupForm())
+const modifierForm = ref(defaultModifierForm())
 
-// ── Toggle field config ───────────────────────────────────
+// ── Toggle fields config ──────────────────────────────────
 const toggleFields = [
   { key: 'is_available', label: 'Available'  },
   { key: 'is_popular',   label: 'Popular'    },
   { key: 'is_instant',   label: '⚡ Instant' },
 ]
 
-// ── Forms ─────────────────────────────────────────────────
-const defaultItemForm = () => ({
-  name:                '',
-  description:         '',
-  price:               0,
-  cost_price:          0,
-  category_id:         '',
-  icon:                '',
-  type:                'food',
-  prep_time:           15,
-  is_available:        true,
-  is_popular:          false,
-  is_instant:          false,
-  modifier_group_ids:  [],
-})
-
-const defaultGroupForm = () => ({
-  name:        '',
-  is_required: false,
-  min_select:  0,
-  max_select:  1,
-  sort_order:  0,
-})
-
-const defaultModifierForm = () => ({
-  name:      '',
-  price:     0,
-  is_active: true,
-})
-
-const categoryForm  = ref({ name: '', icon: '' })
-const itemForm      = ref(defaultItemForm())
-const groupForm     = ref(defaultGroupForm())
-const modifierForm  = ref(defaultModifierForm())
+// ── Toast ─────────────────────────────────────────────────
+const toast = ref({ show: false, message: '', type: 'success' })
+function showToast(message, type = 'success') {
+  toast.value = { show: true, message, type }
+  setTimeout(() => { toast.value.show = false }, 3000)
+}
 
 // ── Computed ──────────────────────────────────────────────
 const filteredItems = computed(() => {
   let items = menuItems.value
-  if (selectedCategory.value) {
-    items = items.filter(i => i.category_id == selectedCategory.value)
-  }
+  if (selectedCategory.value) items = items.filter(i => i.category_id == selectedCategory.value)
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.toLowerCase()
     items = items.filter(i => i.name.toLowerCase().includes(q))
@@ -850,7 +956,15 @@ const filteredItems = computed(() => {
   return items
 })
 
-// ── Load data ─────────────────────────────────────────────
+const pricingEligibleItems = computed(() => {
+  const q = pricingItemSearch.value.toLowerCase()
+  return menuItems.value.filter(item => {
+    const hasGroups = (item.modifier_groups?.length ?? 0) > 0
+    return hasGroups && (!q || item.name.toLowerCase().includes(q))
+  })
+})
+
+// ── Data loaders ──────────────────────────────────────────
 async function loadAll() {
   await Promise.all([loadCategories(), loadMenuItems(), loadModifierGroups()])
 }
@@ -868,7 +982,6 @@ async function loadMenuItems() {
 async function loadModifierGroups() {
   const { data } = await axios.get('/modifier-groups')
   modifierGroups.value = data
-  // Refresh selected group data
   if (selectedGroup.value) {
     selectedGroup.value = data.find(g => g.id === selectedGroup.value.id) ?? null
   }
@@ -877,16 +990,12 @@ async function loadModifierGroups() {
 // ── Categories ────────────────────────────────────────────
 function openCategoryModal(cat) {
   editingCategory.value = cat
-  categoryForm.value = cat
-    ? { name: cat.name, icon: cat.icon ?? '' }
-    : { name: '', icon: '' }
+  categoryForm.value = cat ? { name: cat.name, icon: cat.icon ?? '' } : { name: '', icon: '' }
   showCategoryModal.value = true
 }
 
 async function saveCategory() {
-  if (!categoryForm.value.name.trim()) {
-    showToast('Category name is required', 'error'); return
-  }
+  if (!categoryForm.value.name.trim()) { showToast('Category name is required', 'error'); return }
   try {
     if (editingCategory.value) {
       await axios.put(`/menu/categories/${editingCategory.value.id}`, categoryForm.value)
@@ -897,9 +1006,7 @@ async function saveCategory() {
     }
     showCategoryModal.value = false
     await loadCategories()
-  } catch (e) {
-    showToast(e.response?.data?.message ?? 'Failed to save', 'error')
-  }
+  } catch (e) { showToast(e.response?.data?.message ?? 'Failed to save', 'error') }
 }
 
 async function deleteCategory(cat) {
@@ -908,26 +1015,18 @@ async function deleteCategory(cat) {
     await axios.delete(`/menu/categories/${cat.id}`)
     showToast('Category deleted')
     await loadCategories()
-  } catch (e) {
-    showToast(e.response?.data?.message ?? 'Cannot delete', 'error')
-  }
+  } catch (e) { showToast(e.response?.data?.message ?? 'Cannot delete', 'error') }
 }
 
 // ── Menu Items ────────────────────────────────────────────
 function openItemModal(item) {
   editingItem.value = item
   itemForm.value = item ? {
-    name:               item.name,
-    description:        item.description ?? '',
-    price:              parseFloat(item.price),
-    cost_price:         parseFloat(item.cost_price ?? 0),
-    category_id:        item.category_id,
-    icon:               item.icon ?? '',
-    type:               item.type ?? 'food',
-    prep_time:          item.prep_time ?? 15,
-    is_available:       !!item.is_available,
-    is_popular:         !!item.is_popular,
-    is_instant:         !!item.is_instant,
+    name: item.name, description: item.description ?? '',
+    price: parseFloat(item.price), cost_price: parseFloat(item.cost_price ?? 0),
+    category_id: item.category_id, icon: item.icon ?? '',
+    type: item.type ?? 'food', prep_time: item.prep_time ?? 15,
+    is_available: !!item.is_available, is_popular: !!item.is_popular, is_instant: !!item.is_instant,
     modifier_group_ids: (item.modifier_groups ?? []).map(g => g.id),
   } : defaultItemForm()
   showItemModal.value = true
@@ -936,23 +1035,13 @@ function openItemModal(item) {
 function toggleGroupOnItem(groupId) {
   const ids = itemForm.value.modifier_group_ids
   const idx = ids.indexOf(groupId)
-  if (idx >= 0) {
-    ids.splice(idx, 1)
-  } else {
-    ids.push(groupId)
-  }
+  idx >= 0 ? ids.splice(idx, 1) : ids.push(groupId)
 }
 
 async function saveItem() {
-  if (!itemForm.value.name.trim()) {
-    showToast('Item name is required', 'error'); return
-  }
-  if (!itemForm.value.category_id) {
-    showToast('Please select a category', 'error'); return
-  }
-  if (!itemForm.value.price || itemForm.value.price <= 0) {
-    showToast('Price must be greater than 0', 'error'); return
-  }
+  if (!itemForm.value.name.trim())    { showToast('Item name is required', 'error'); return }
+  if (!itemForm.value.category_id)    { showToast('Please select a category', 'error'); return }
+  if (!(itemForm.value.price > 0))    { showToast('Price must be greater than 0', 'error'); return }
   try {
     if (editingItem.value) {
       await axios.put(`/menu/items/${editingItem.value.id}`, itemForm.value)
@@ -963,9 +1052,7 @@ async function saveItem() {
     }
     showItemModal.value = false
     await loadMenuItems()
-  } catch (e) {
-    showToast(e.response?.data?.message ?? 'Failed to save', 'error')
-  }
+  } catch (e) { showToast(e.response?.data?.message ?? 'Failed to save', 'error') }
 }
 
 async function toggleAvailability(item) {
@@ -973,9 +1060,7 @@ async function toggleAvailability(item) {
     await axios.patch(`/menu/items/${item.id}/toggle`)
     await loadMenuItems()
     showToast(item.is_available ? 'Item disabled' : 'Item enabled')
-  } catch (e) {
-    showToast('Failed to toggle', 'error')
-  }
+  } catch (e) { showToast('Failed to toggle', 'error') }
 }
 
 async function deleteItem(item) {
@@ -984,35 +1069,24 @@ async function deleteItem(item) {
     await axios.delete(`/menu/items/${item.id}`)
     showToast('Item deleted')
     await loadMenuItems()
-  } catch (e) {
-    showToast(e.response?.data?.message ?? 'Cannot delete', 'error')
-  }
-}
-
-async function filterItems() {
-  // filtering is handled by computed, but we call this for UX feedback
+  } catch (e) { showToast(e.response?.data?.message ?? 'Cannot delete', 'error') }
 }
 
 // ── Modifier Groups ───────────────────────────────────────
 function openGroupModal(group) {
   editingGroup.value = group
   groupForm.value = group ? {
-    name:        group.name,
-    is_required: group.is_required,
-    min_select:  group.min_select,
-    max_select:  group.max_select,
-    sort_order:  group.sort_order ?? 0,
+    name: group.name, is_required: group.is_required,
+    min_select: group.min_select, max_select: group.max_select, sort_order: group.sort_order ?? 0,
   } : defaultGroupForm()
   showGroupModal.value = true
 }
 
 async function saveGroup() {
-  if (!groupForm.value.name.trim()) {
-    showToast('Group name is required', 'error'); return
-  }
+  if (!groupForm.value.name.trim()) { showToast('Group name is required', 'error'); return }
   try {
     if (editingGroup.value) {
-      const { data } = await axios.put(`/modifier-groups/${editingGroup.value.id}`, groupForm.value)
+      await axios.put(`/modifier-groups/${editingGroup.value.id}`, groupForm.value)
       showToast('Group updated ✓')
     } else {
       await axios.post('/modifier-groups', groupForm.value)
@@ -1020,9 +1094,7 @@ async function saveGroup() {
     }
     showGroupModal.value = false
     await loadModifierGroups()
-  } catch (e) {
-    showToast(e.response?.data?.message ?? 'Failed to save', 'error')
-  }
+  } catch (e) { showToast(e.response?.data?.message ?? 'Failed to save', 'error') }
 }
 
 async function deleteGroup(group) {
@@ -1032,42 +1104,31 @@ async function deleteGroup(group) {
     selectedGroup.value = null
     showToast('Group deleted')
     await loadModifierGroups()
-  } catch (e) {
-    showToast(e.response?.data?.message ?? 'Cannot delete', 'error')
-  }
+  } catch (e) { showToast(e.response?.data?.message ?? 'Cannot delete', 'error') }
 }
 
-// ── Modifiers ─────────────────────────────────────────────
+// ── Modifier Options ──────────────────────────────────────
 function openModifierModal(mod) {
   editingModifier.value = mod
   modifierForm.value = mod ? {
-    name:      mod.name,
-    price:     parseFloat(mod.price ?? 0),
-    is_active: mod.is_active !== false,
+    name: mod.name, price: parseFloat(mod.price ?? 0), is_active: mod.is_active !== false,
   } : defaultModifierForm()
   showModifierModal.value = true
 }
 
 async function saveModifier() {
-  if (!modifierForm.value.name.trim()) {
-    showToast('Option name is required', 'error'); return
-  }
+  if (!modifierForm.value.name.trim()) { showToast('Option name is required', 'error'); return }
   try {
     if (editingModifier.value) {
       await axios.put(`/modifiers/${editingModifier.value.id}`, modifierForm.value)
       showToast('Option updated ✓')
     } else {
-      await axios.post('/modifiers', {
-        modifier_group_id: selectedGroup.value.id,
-        ...modifierForm.value,
-      })
+      await axios.post('/modifiers', { modifier_group_id: selectedGroup.value.id, ...modifierForm.value })
       showToast('Option added ✓')
     }
     showModifierModal.value = false
     await loadModifierGroups()
-  } catch (e) {
-    showToast(e.response?.data?.message ?? 'Failed to save', 'error')
-  }
+  } catch (e) { showToast(e.response?.data?.message ?? 'Failed to save', 'error') }
 }
 
 async function deleteModifier(mod) {
@@ -1076,8 +1137,101 @@ async function deleteModifier(mod) {
     await axios.delete(`/modifiers/${mod.id}`)
     showToast('Option deleted')
     await loadModifierGroups()
+  } catch (e) { showToast(e.response?.data?.message ?? 'Cannot delete', 'error') }
+}
+
+// ── Pricing Tab ───────────────────────────────────────────
+
+/**
+ * FIX 1: Reset modifierPricing before loading new item's data.
+ * FIX 2: Added missing allModifiers ref.
+ * FIX 3: pricingLoading now always resets in finally block.
+ * FIX 4: Use Promise.all instead of sequential awaits (race condition).
+ */
+async function selectItemForPricing(item) {
+  selectedItemForPricing.value = item
+  modifierPricing.value = {}      // FIX: clear stale data from previously selected item
+  pricingLoading.value  = true
+
+  try {
+    const [modRes, pricingRes] = await Promise.all([
+      axios.get(`/menu/items/${item.id}/modifiers`),
+      axios.get(`/menu/items/${item.id}/modifier-pricing`),
+    ])
+
+    allModifiers.value = modRes.data
+
+    // Populate saved pricing from DB (item-specific)
+    pricingRes.data.forEach(p => {
+      modifierPricing.value[p.modifier_id] = {
+        pricing_type:    p.pricing_type    || 'absolute',
+        custom_price:    parseFloat(p.custom_price    ?? 0),
+        increment_price: parseFloat(p.increment_price ?? 0),
+      }
+    })
+
+    // Initialise defaults for modifiers that have no saved pricing yet
+    allModifiers.value.forEach(modifier => {
+      if (!modifierPricing.value[modifier.id]) {
+        modifierPricing.value[modifier.id] = {
+          pricing_type:    'absolute',
+          custom_price:    parseFloat(modifier.price) || 0,
+          increment_price: 0,
+        }
+      }
+    })
   } catch (e) {
-    showToast(e.response?.data?.message ?? 'Cannot delete', 'error')
+    showToast('Failed to load modifier pricing', 'error')
+  } finally {
+    pricingLoading.value = false   // FIX: always stop spinner, even on error
+  }
+}
+
+function getModifierPricing(modifierId) {
+  return modifierPricing.value[modifierId] ?? { pricing_type: 'absolute', custom_price: 0, increment_price: 0 }
+}
+
+function getPricingValue(modifierId) {
+  const p = getModifierPricing(modifierId)
+  return p.pricing_type === 'increment' ? p.increment_price : p.custom_price
+}
+
+function setPricingType(modifierId, type) {
+  modifierPricing.value[modifierId] = { ...getModifierPricing(modifierId), pricing_type: type }
+}
+
+function setPricingValue(modifierId, rawValue) {
+  const val = parseFloat(rawValue) || 0
+  const cur = getModifierPricing(modifierId)
+  modifierPricing.value[modifierId] = cur.pricing_type === 'increment'
+    ? { ...cur, increment_price: val }
+    : { ...cur, custom_price: val }
+}
+
+function computePreviewPrice(modifierId) {
+  if (!selectedItemForPricing.value) return '—'
+  const base = parseFloat(selectedItemForPricing.value.price)
+  const p    = getModifierPricing(modifierId)
+  const addon = p.pricing_type === 'increment' ? (p.increment_price ?? 0) : (p.custom_price ?? 0)
+  return (base + addon).toFixed(2)
+}
+
+async function saveModifierPricing() {
+  if (!selectedItemForPricing.value || pricingSaving.value) return
+  pricingSaving.value = true
+  try {
+    const payload = Object.entries(modifierPricing.value).map(([modifierId, p]) => ({
+      modifier_id:     parseInt(modifierId),
+      pricing_type:    p.pricing_type,
+      custom_price:    p.pricing_type === 'absolute'  ? p.custom_price    : null,
+      increment_price: p.pricing_type === 'increment' ? p.increment_price : null,
+    }))
+    await axios.patch(`/menu/items/${selectedItemForPricing.value.id}/modifier-pricing`, { pricing: payload })
+    showToast('Modifier pricing saved ✓')
+  } catch (e) {
+    showToast(e.response?.data?.message ?? 'Failed to save pricing', 'error')
+  } finally {
+    pricingSaving.value = false
   }
 }
 

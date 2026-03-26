@@ -136,8 +136,7 @@
             :key="order.id"
             style="padding:12px; background:#1A1E28; border:1px solid #252B38; 
                    border-radius:8px; transition:all 0.15s;">
-            <div style="display:flex; justify-content:space-between; align-items-center; margin-bottom:8px;">
-              <div style="font-weight:600; color:#F1F5F9;">{{ order.order_number }}</div>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">              <div style="font-weight:600; color:#F1F5F9;">{{ order.order_number }}</div>
               <div style="font-size:11px; color:#64748B;">{{ formatTime(order.created_at) }}</div>
             </div>
             

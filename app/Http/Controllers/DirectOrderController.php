@@ -47,7 +47,7 @@ class DirectOrderController extends Controller
                 'status'          => 'pending',
                 'guests'          => 1,
                 'subtotal'        => 0,
-                'tax_rate'        => 10,
+                'tax_rate'        => 0, // 0% service charge for direct orders
                 'tax_amount'      => 0,
                 'discount_amount' => 0,
                 'total'           => 0,
