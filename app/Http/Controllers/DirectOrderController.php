@@ -20,6 +20,9 @@ class DirectOrderController extends Controller
         ])
         ->whereNull('table_id')
         ->where('payment_status', '!=', 'paid')
+        ->whereHas('items', function($query) {
+            $query->whereNotNull('kot_round');
+        })
         ->orderByDesc('created_at')
         ->get();
 
@@ -174,6 +177,31 @@ class DirectOrderController extends Controller
 
             DB::commit();
             return response()->json(['message' => 'Order cancelled.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * DELETE /api/direct-orders/{id}
+     * Delete a pending direct order
+     */
+    public function deleteOrder($id)
+    {
+        DB::beginTransaction();
+        try {
+            $order = Order::findOrFail($id);
+            
+            // Only allow deletion of orders without KOT items or unpaid orders
+            if ($order->payment_status === 'paid') {
+                return response()->json(['message' => 'Cannot delete paid orders'], 422);
+            }
+            
+            $order->delete();
+            
+            DB::commit();
+            return response()->json(['message' => 'Order deleted successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => $e->getMessage()], 500);

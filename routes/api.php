@@ -81,6 +81,7 @@ Route::post('/direct-orders/{id}/switch', [DirectOrderController::class, 'switch
 Route::patch('/direct-orders/{id}/customer', [DirectOrderController::class, 'updateCustomer']);
 Route::patch('/direct-orders/{id}/type', [DirectOrderController::class, 'updateType']);
 Route::post('/direct-orders/{id}/cancel', [DirectOrderController::class, 'cancelOrder']);
+Route::delete('/direct-orders/{id}', [DirectOrderController::class, 'deleteOrder']);
 
 // Order KOT operations
     Route::post('/orders/{id}/send-kot', [OrderController::class, 'sendKOT']);
