@@ -531,7 +531,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onActivated } from 'vue'
 import axios from 'axios'
 
 // ── State ──────────────────────────────────────────────
@@ -682,8 +682,8 @@ function applyPreset(preset) {
 function formatNum(n) {
   const num = parseFloat(n ?? 0)
   if (isNaN(num)) return '0.00'
-  if (num >= 1000) return (num / 1000).toFixed(1) + 'k'
-  return num.toFixed(2)
+  // Show full amount with comma separators, no abbreviations
+  return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 function formatShortDate(dateStr) {
@@ -752,6 +752,13 @@ async function loadTransactions() {
 }
 
 onMounted(() => {
+  loadReport()
+  loadTransactions()
+})
+
+// Refresh when component becomes active (e.g., when navigating back from payment)
+onActivated(() => {
+  console.log('Reports activated - refreshing data...')
   loadReport()
   loadTransactions()
 })

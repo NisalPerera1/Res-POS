@@ -56,7 +56,11 @@
     <!-- Main content -->
     <main style="flex:1; overflow:hidden; position:relative;">
 
-      <router-view />
+      <router-view v-slot="{ Component }">
+        <keep-alive>
+          <component :is="Component" />
+        </keep-alive>
+      </router-view>
     </main>
 
   </div>

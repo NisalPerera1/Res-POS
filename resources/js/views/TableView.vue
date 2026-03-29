@@ -392,7 +392,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onActivated, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 
@@ -431,28 +431,46 @@ const filters = [
 ]
 
 // ── Computed ──────────────────────────────────────────
-const stats = computed(() => [
-  {
-    label: 'Free',
-    value: tables.value.filter(t => t.status === 'free').length,
-    color: '#10B981',
-  },
-  {
-    label: 'Occupied',
-    value: tables.value.filter(t => t.status === 'occupied').length,
-    color: '#3B82F6',
-  },
-  {
-    label: 'Reserved',
-    value: tables.value.filter(t => t.status === 'reserved').length,
-    color: '#8B5CF6',
-  },
-  {
-    label: 'Revenue',
-    value: 'Rs. ' + todayTotalRevenue.value.toFixed(0),
-    color: '#F59E0B',
-  },
-])
+const stats = computed(() => {
+  console.log('Stats computed - todayTotalRevenue:', todayTotalRevenue.value);
+  
+  return [
+    {
+      label: 'Free',
+      value: tables.value.filter(t => t.status === 'free').length,
+      color: '#10B981',
+    },
+    {
+      label: 'Occupied',
+      value: tables.value.filter(t => t.status === 'occupied').length,
+      color: '#3B82F6',
+    },
+    {
+      label: 'Reserved',
+      value: tables.value.filter(t => t.status === 'reserved').length,
+      color: '#8B5CF6',
+    },
+    {
+      label: 'Revenue',
+      value: (() => {
+        const rawValue = todayTotalRevenue.value || 0;
+        const stringValue = 'Rs. ' + Math.round(rawValue).toString();
+        console.log('Revenue value calculation:', { 
+          raw: rawValue, 
+          rounded: Math.round(rawValue), 
+          string: stringValue,
+          typeof: typeof stringValue
+        });
+        return stringValue;
+      })(),
+      color: '#F59E0B',
+    },
+  ]
+})
+
+watch(todayTotalRevenue, (newValue, oldValue) => {
+  console.log('todayTotalRevenue changed:', { oldValue, newValue })
+}, { immediate: true })
 
 const filteredTables = computed(() =>
   activeFilter.value === 'all'
@@ -641,11 +659,12 @@ async function closeTable(table) {
   }
 }
 
-// ── Lifecycle ─────────────────────────────────────────
-onMounted(async () => {
-  console.log('TableView mounted - loading tables...')
+// ── Load Tables Function ───────────────────────────────
+async function loadTables() {
+  console.log('Loading tables...')
   try {
     const { data } = await axios.get('/tables')
+    console.log('Tables API response:', data)
     console.log('Tables loaded successfully:', data.tables?.length || data.length)
     
     // Handle new data structure (with revenue breakdown) or old structure
@@ -654,12 +673,20 @@ onMounted(async () => {
       todayTotalRevenue.value = data.today_total_revenue
       todayTableRevenue.value = data.today_table_revenue
       todayDirectRevenue.value = data.today_direct_revenue
+      
+      console.log('Revenue data updated:', {
+        total: todayTotalRevenue.value,
+        table: todayTableRevenue.value,
+        direct: todayDirectRevenue.value
+      })
     } else {
       // Backward compatibility - old format
       tables.value = Array.isArray(data) ? data : []
       todayTotalRevenue.value = 0
       todayTableRevenue.value = 0
       todayDirectRevenue.value = 0
+      
+      console.log('Using old data format - revenue set to 0')
     }
   } catch (e) {
     console.error('Failed to load tables:', e)
@@ -673,6 +700,11 @@ onMounted(async () => {
       return
     }
   }
+}
+
+// ── Lifecycle ─────────────────────────────────────────
+onMounted(async () => {
+  await loadTables()
 
   // Real-time table updates
   if (window.Echo) {
@@ -682,5 +714,11 @@ onMounted(async () => {
       else tables.value.push(e.table)
     })
   }
+})
+
+// Refresh when component becomes active (e.g., when navigating back from direct order)
+onActivated(async () => {
+  console.log('TableView activated - refreshing data...')
+  await loadTables()
 })
 </script>
