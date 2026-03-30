@@ -89,7 +89,8 @@
             <div v-if="item.modifier_groups?.length > 0"
               style="position:absolute; top:6px; left:6px; font-size:9px; font-weight:700;
                      background:rgba(139,92,246,0.15); color:#8B5CF6; padding:1px 5px; border-radius:4px;">⚙️</div>
-            <div style="font-size:28px; margin-bottom:6px;">{{ item.icon ?? '🍽️' }}</div>
+            <div v-if="item.image" style="width:110px; height:90px; border-radius:12px; margin-bottom:8px; background-size:cover; background-position:center; background-repeat:no-repeat; background-color:#1A1E28;" :style="{ backgroundImage: 'url(/storage/menu_items/' + item.image + ')' }"></div>
+            <div v-else style="width:110px; height:90px; border-radius:12px; margin-bottom:8px; background-color:#2D3748; display:flex; align-items:center; justify-content:center; font-size:36px; color:#64748B;">🍽️</div>
             <div style="font-size:12px; font-weight:500; color:#F1F5F9; line-height:1.3;">{{ item.name }}</div>
             <div style="font-size:14px; font-weight:700; margin-top:5px;"
               :style="{ color: item.is_instant ? '#10B981' : '#F59E0B' }">

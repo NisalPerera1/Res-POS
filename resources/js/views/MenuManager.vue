@@ -109,13 +109,11 @@
 
             <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:10px;">
               <div style="flex:1; min-width:0;">
-                <div style="font-size:14px; font-weight:700; color:#F1F5F9; white-space:nowrap;
-                             overflow:hidden; text-overflow:ellipsis;">{{ item.name }}</div>
-                <div style="font-size:15px; font-weight:700; color:#F59E0B; margin-top:2px;">
-                  Rs.{{ parseFloat(item.price).toFixed(2) }}
-                </div>
+                <div v-if="item.image" style="width:110px; height:90px; border-radius:12px; margin-bottom:10px; background-size:cover; background-position:center; background-repeat:no-repeat; background-color:#1A1E28; align-self:center;" :style="{ backgroundImage: 'url(/storage/menu_items/' + item.image + ')' }"></div>
+                <div v-else style="width:110px; height:90px; border-radius:12px; margin-bottom:10px; background-color:#2D3748; display:flex; align-items:center; justify-content:center; font-size:36px; color:#64748B;">🍽️</div>
+                <div style="font-size:14px; font-weight:700; color:#F1F5F9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ item.name }}</div>
+                <div style="font-size:15px; font-weight:700; color:#F59E0B; margin-top:2px;">Rs.{{ parseFloat(item.price).toFixed(2) }}</div>
               </div>
-              <div style="font-size:28px; margin-left:8px; flex-shrink:0;">{{ item.icon ?? '🍽️' }}</div>
             </div>
 
             <div style="font-size:11px; color:#64748B; margin-bottom:10px; line-height:1.4;

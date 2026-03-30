@@ -302,4 +302,29 @@ class MenuController extends Controller
 
         return response()->json($modifiers);
     }
+
+    /**
+     * POST /menu/items/upload-image
+     * Upload image for menu item
+     */
+    public function uploadItemImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,jpg,png,gif|max:2048'
+        ]);
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('storage/menu_items'), $filename);
+            
+            return response()->json([
+                'success' => true,
+                'filename' => $filename,
+                'url' => '/storage/menu_items/' . $filename
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'No file uploaded'], 400);
+    }
 }

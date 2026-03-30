@@ -74,7 +74,8 @@
             @mouseenter="e => { if(item.is_available) { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.borderColor='#F59E0B' } }"
             @mouseleave="e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.borderColor='#252B38' }"
           >
-            <div style="font-size:28px; margin-bottom:6px;">{{ item.icon ?? '🍽️' }}</div>
+            <div v-if="item.image" style="width:110px; height:90px; border-radius:12px; margin-bottom:8px; background-size:cover; background-position:center; background-repeat:no-repeat; background-color:#1A1E28;" :style="{ backgroundImage: 'url(/storage/menu_items/' + item.image + ')' }"></div>
+            <div v-else style="width:110px; height:90px; border-radius:12px; margin-bottom:8px; background-color:#2D3748; display:flex; align-items:center; justify-content:center; font-size:36px; color:#64748B;">🍽️</div>
             <div style="font-size:12px; font-weight:500; color:#F1F5F9; line-height:1.3;">{{ item.name }}</div>
             <div style="font-size:14px; font-weight:700; color:#F59E0B; margin-top:5px;">Rs. {{ item.price }}</div>
             <div v-if="item.is_popular"

@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/menu/items/{item}/modifier-pricing',   [ModifierPricingController::class, 'update']);
     Route::get('/menu/items/{item}/price-preview',   [OrderController::class, 'pricePreview']);
     Route::post('/menu/items',                           [MenuController::class, 'storeItem']);
+    Route::post('/menu/items/upload-image',                [MenuController::class, 'uploadItemImage']);
     Route::put('/menu/items/{id}',                       [MenuController::class, 'updateItem']);
     Route::delete('/menu/items/{id}',                    [MenuController::class, 'destroyItem']);
     Route::patch('/menu/items/{id}/toggle-availability', [MenuController::class, 'toggleAvailability']);
