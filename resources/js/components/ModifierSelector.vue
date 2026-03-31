@@ -19,7 +19,7 @@
               {{ item.name }}
             </div>
             <div style="font-size:12px; color:#64748B; margin-top:2px;">
-              Base price: ${{ parseFloat(item.price).toFixed(2) }}
+              Base price: Rs.{{ parseFloat(item.price).toFixed(2) }}
             </div>
           </div>
           <button @click="$emit('cancel')"
@@ -89,7 +89,7 @@
                   <div v-if="getModifierPrice(mod) > 0"
                     style="font-size:11px; margin-top:1px;"
                     :style="{ color: isSelected(mod.id) ? '#F59E0B' : '#64748B' }">
-                    +${{ getModifierPrice(mod).toFixed(2) }}
+                    +Rs.{{ getModifierPrice(mod).toFixed(2) }}
                   </div>
                   <div v-else style="font-size:11px; color:#64748B; margin-top:1px;">
                     Included
@@ -146,12 +146,12 @@
               <div style="font-size:12px; color:#64748B;">Total per item</div>
               <div v-if="selectedModifierObjects.length > 0"
                 style="font-size:10px; color:#64748B; margin-top:2px;">
-                Base ${{ parseFloat(item.price).toFixed(2) }}
+                Base Rs.{{ parseFloat(item.price).toFixed(2) }}
                 + {{ selectedModifierObjects.map(m => m.name).join(', ') }}
               </div>
             </div>
             <div style="font-size:20px; font-weight:700; color:#F59E0B;">
-              ${{ totalPrice }}
+              Rs.{{ totalPrice }}
             </div>
           </div>
 
@@ -187,7 +187,7 @@
               @mouseenter="e => e.currentTarget.style.filter='brightness(1.1)'"
               @mouseleave="e => e.currentTarget.style.filter='brightness(1)'"
             >
-              Add {{ qty }} to Cart · ${{ (parseFloat(totalPrice) * qty).toFixed(2) }}
+              Add {{ qty }} to Cart · Rs.{{ (parseFloat(totalPrice) * qty).toFixed(2) }}
             </button>
           </div>
         </div>

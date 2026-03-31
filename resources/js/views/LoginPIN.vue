@@ -99,6 +99,11 @@
               {{ pinError ? pinError : 'Enter your 4-digit PIN' }}
             </div>
 
+            <!-- Keyboard hint -->
+            <div class="keyboard-hint">
+              💡 You can also use your keyboard: 0-9, Backspace, Enter, Esc
+            </div>
+
             <!-- Numpad -->
             <div class="numpad">
               <button
@@ -141,7 +146,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter }      from 'vue-router'
 import { useAuthStore }   from '@/stores/auth'
 import axios              from 'axios'
@@ -156,6 +161,36 @@ const pinError     = ref('')
 const loadingUsers = ref(true)
 const loadError    = ref('')
 const pinKeys      = ['1','2','3','4','5','6','7','8','9','⌫','0','↵']
+
+// ── Keyboard Event Handler ───────────────────────────────────────
+function handleKeyboardInput(event) {
+  // Only handle keyboard input when a user is selected
+  if (!selectedUser.value) return
+  
+  const key = event.key
+  
+  // Prevent default for number keys and special keys
+  if (/^[0-9]$/.test(key) || key === 'Backspace' || key === 'Enter' || key === 'Delete') {
+    event.preventDefault()
+  }
+  
+  // Handle number keys
+  if (/^[0-9]$/.test(key)) {
+    pressKey(key)
+  }
+  // Handle backspace and delete
+  else if (key === 'Backspace' || key === 'Delete') {
+    pressKey('⌫')
+  }
+  // Handle enter
+  else if (key === 'Enter') {
+    pressKey('↵')
+  }
+  // Handle escape to clear selection
+  else if (key === 'Escape') {
+    clearSelection()
+  }
+}
 
 // ── Helpers ────────────────────────────────────────────────
 function initials(name) {
@@ -235,7 +270,17 @@ async function attemptLogin() {
   }
 }
 
-onMounted(loadUsers)
+// ── Lifecycle ─────────────────────────────────────────────
+onMounted(() => {
+  loadUsers()
+  // Add keyboard event listener
+  document.addEventListener('keydown', handleKeyboardInput)
+})
+
+onUnmounted(() => {
+  // Remove keyboard event listener
+  document.removeEventListener('keydown', handleKeyboardInput)
+})
 </script>
 
 <style scoped>
@@ -546,10 +591,22 @@ onMounted(loadUsers)
 .pin-hint {
   font-size: 11px;
   color: #334155;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   min-height: 16px;
   transition: color 0.15s;
   color: v-bind("pinError ? '#EF4444' : '#475569'");
+}
+
+.keyboard-hint {
+  font-size: 10px;
+  color: #64748B;
+  margin-bottom: 16px;
+  text-align: center;
+  padding: 6px 10px;
+  background: rgba(100, 116, 139, 0.06);
+  border-radius: 6px;
+  border: 1px solid rgba(100, 116, 139, 0.12);
+  line-height: 1.3;
 }
 
 /* ── Numpad ── */
