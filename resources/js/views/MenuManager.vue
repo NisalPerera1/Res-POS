@@ -559,7 +559,7 @@
 
           <div style="display:flex; flex-direction:column; gap:14px;">
 
-            <!-- Name + Icon -->
+            <!-- Name + Image -->
             <div style="display:flex; gap:12px;">
               <div style="flex:1;">
                 <label style="font-size:11px; color:#64748B; display:block; margin-bottom:5px;
@@ -570,14 +570,18 @@
                   @focus="e => e.target.style.borderColor='#F59E0B'"
                   @blur="e => e.target.style.borderColor='#252B38'" />
               </div>
-              <div style="width:90px;">
+              <div style="width:120px;">
                 <label style="font-size:11px; color:#64748B; display:block; margin-bottom:5px;
-                               text-transform:uppercase; letter-spacing:0.05em;">Icon</label>
-                <input v-model="itemForm.icon" placeholder="🍔"
-                  style="width:100%; padding:9px 12px; background:#12151C; border:1px solid #252B38;
-                         border-radius:8px; color:#F1F5F9; font-size:22px; outline:none; text-align:center;"
+                               text-transform:uppercase; letter-spacing:0.05em;">Image</label>
+                <input type="file" @change="handleImageUpload" accept="image/*"
+                  style="width:100%; padding:6px 9px; background:#12151C; border:1px solid #252B38;
+                         border-radius:8px; color:#F1F5F9; font-size:12px; outline:none;"
                   @focus="e => e.target.style.borderColor='#F59E0B'"
                   @blur="e => e.target.style.borderColor='#252B38'" />
+                <div v-if="itemForm.image" style="margin-top:5px; text-align:center;">
+                  <img :src="'/storage/menu_items/' + itemForm.image" 
+                       style="width:110px; height:90px; border-radius:12px; object-fit:cover;" />
+                </div>
               </div>
             </div>
 
@@ -917,7 +921,7 @@ const editingModifier = ref(null)
 // ── Form defaults ─────────────────────────────────────────
 const defaultItemForm = () => ({
   name: '', description: '', price: 0, cost_price: 0,
-  category_id: '', icon: '', type: 'food', prep_time: 15,
+  category_id: '', image: '', type: 'food', prep_time: 15,
   is_available: true, is_popular: false, is_instant: false,
   modifier_group_ids: [],
 })
@@ -1022,7 +1026,7 @@ function openItemModal(item) {
   itemForm.value = item ? {
     name: item.name, description: item.description ?? '',
     price: parseFloat(item.price), cost_price: parseFloat(item.cost_price ?? 0),
-    category_id: item.category_id, icon: item.icon ?? '',
+    category_id: item.category_id, image: item.image ?? '',
     type: item.type ?? 'food', prep_time: item.prep_time ?? 15,
     is_available: !!item.is_available, is_popular: !!item.is_popular, is_instant: !!item.is_instant,
     modifier_group_ids: (item.modifier_groups ?? []).map(g => g.id),
@@ -1034,6 +1038,30 @@ function toggleGroupOnItem(groupId) {
   const ids = itemForm.value.modifier_group_ids
   const idx = ids.indexOf(groupId)
   idx >= 0 ? ids.splice(idx, 1) : ids.push(groupId)
+}
+
+function handleImageUpload(event) {
+  const file = event.target.files[0]
+  if (!file) return
+  
+  const formData = new FormData()
+  formData.append('image', file)
+  
+  // Upload to server
+  axios.post('/menu/items/upload-image', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  }).then(response => {
+    if (response.data.success) {
+      itemForm.value.image = response.data.filename
+      showToast('Image uploaded ✓')
+    } else {
+      showToast(response.data.message || 'Upload failed', 'error')
+    }
+  }).catch(error => {
+    showToast('Upload failed: ' + (error.response?.data?.message || error.message), 'error')
+  })
 }
 
 async function saveItem() {
