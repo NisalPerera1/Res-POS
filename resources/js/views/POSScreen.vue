@@ -360,7 +360,7 @@
 
         <!-- Action Buttons -->
         <div style="padding:6px 8px; flex-shrink:0; display:flex; flex-direction:column; gap:4px;
-                    padding-bottom:calc(6px + env(safe-area-inset-bottom, 0px)); position:sticky; bottom:0; background:#12151C;">
+                    padding-bottom:calc(6px + env(safe-area-inset-bottom, 0px)); background:#12151C;">
           <div v-if="unsentItems.length > 0 && sentItems.length > 0"
             style="font-size:9px; color:#F59E0B; text-align:center; padding:4px 6px;
                    background:rgba(245,158,11,0.08); border-radius:4px;
@@ -373,7 +373,7 @@
             :disabled="orderItems.length === 0"
             style="width:100%; padding:10px; border-radius:6px; font-size:13px;
                    font-weight:700; background:#F59E0B; color:#000; border:none;
-                   cursor:pointer; min-height:44px; position:relative; z-index:10;
+                   cursor:pointer; min-height:44px;
                    -webkit-tap-highlight-color:transparent; touch-action:manipulation;"
             :style="{ opacity: orderItems.length > 0 ? '1' : '0.4',
                       cursor:  orderItems.length > 0 ? 'pointer' : 'not-allowed' }"
@@ -818,15 +818,14 @@ div::-webkit-scrollbar { display: none; }
   /* Cart panel: slide in from the right, sits over menu panel */
   .cart-panel {
     position: fixed !important;
-    inset: 0 !important;          /* full screen */
+    top: 53px !important;          /* align with top bar */
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
     width: 100% !important;
     z-index: 40;
     transform: translateX(100%);
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    /* Push the top bar out of the cart so it isn't hidden under the top bar */
-    /* Top bar is flex-shrink:0 in the parent, so the body's top is already below it.
-       But because cart is position:fixed we need to account for the top bar height. */
-    top: 57px !important;          /* approx top bar height — adjust if needed */
   }
 
   .cart-panel.cart-open {
