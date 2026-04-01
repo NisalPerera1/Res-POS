@@ -733,3 +733,259 @@ onUnmounted(() => {
   }
 })
 </script>
+
+<style scoped>
+/* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+  .payment-modal {
+    width: 95%;
+    max-width: 95%;
+    margin: 2.5% auto;
+    max-height: 95vh;
+  }
+  
+  .payment-content {
+    padding: 16px;
+  }
+  
+  .payment-header {
+    padding: 12px 16px;
+  }
+  
+  .payment-header h2 {
+    font-size: 16px;
+  }
+  
+  .payment-body {
+    padding: 16px;
+    max-height: 60vh;
+  }
+  
+  .order-summary {
+    margin-bottom: 16px;
+  }
+  
+  .order-summary h3 {
+    font-size: 14px;
+  }
+  
+  .summary-item {
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+  
+  .payment-methods {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  
+  .payment-method {
+    padding: 12px;
+    border-radius: 12px;
+  }
+  
+  .payment-method-icon {
+    font-size: 20px;
+  }
+  
+  .payment-method-label {
+    font-size: 12px;
+  }
+  
+  .payment-form {
+    padding: 16px;
+    border-radius: 12px;
+  }
+  
+  .form-group {
+    margin-bottom: 12px;
+  }
+  
+  .form-group label {
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+  
+  .form-group input {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+  
+  .amount-buttons {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  
+  .amount-button {
+    padding: 8px;
+    font-size: 11px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+  }
+  
+  .action-buttons button {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+  }
+  
+  .receipt-modal {
+    width: 95%;
+    max-width: 95%;
+    margin: 2.5% auto;
+    max-height: 95vh;
+  }
+  
+  .receipt-content {
+    padding: 16px;
+    max-height: 80vh;
+  }
+  
+  .receipt-header {
+    padding: 12px 16px;
+  }
+  
+  .receipt-header h3 {
+    font-size: 16px;
+  }
+  
+  .receipt-body {
+    padding: 16px;
+    font-size: 11px;
+  }
+  
+  .receipt-footer {
+    padding: 12px 16px;
+  }
+  
+  .receipt-footer button {
+    font-size: 12px;
+    padding: 8px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-modal {
+    width: 98%;
+    max-width: 98%;
+    margin: 1% auto;
+    max-height: 98vh;
+  }
+  
+  .payment-content {
+    padding: 12px;
+  }
+  
+  .payment-header {
+    padding: 10px 12px;
+  }
+  
+  .payment-header h2 {
+    font-size: 14px;
+  }
+  
+  .payment-body {
+    padding: 12px;
+    max-height: 65vh;
+  }
+  
+  .order-summary h3 {
+    font-size: 13px;
+  }
+  
+  .summary-item {
+    font-size: 10px;
+  }
+  
+  .payment-methods {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  
+  .payment-method {
+    padding: 10px;
+    border-radius: 10px;
+  }
+  
+  .payment-method-icon {
+    font-size: 18px;
+  }
+  
+  .payment-method-label {
+    font-size: 11px;
+  }
+  
+  .payment-form {
+    padding: 12px;
+    border-radius: 10px;
+  }
+  
+  .form-group label {
+    font-size: 10px;
+  }
+  
+  .form-group input {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+  
+  .amount-buttons {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+  
+  .amount-button {
+    padding: 6px;
+    font-size: 10px;
+  }
+  
+  .action-buttons {
+    padding: 12px;
+    gap: 6px;
+  }
+  
+  .action-buttons button {
+    padding: 10px;
+    font-size: 13px;
+  }
+  
+  .receipt-modal {
+    width: 98%;
+    max-width: 98%;
+    margin: 1% auto;
+    max-height: 98vh;
+  }
+  
+  .receipt-content {
+    padding: 12px;
+    max-height: 85vh;
+  }
+  
+  .receipt-header {
+    padding: 10px 12px;
+  }
+  
+  .receipt-header h3 {
+    font-size: 14px;
+  }
+  
+  .receipt-body {
+    padding: 12px;
+    font-size: 10px;
+  }
+  
+  .receipt-footer {
+    padding: 10px 12px;
+  }
+  
+  .receipt-footer button {
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+}
+</style>

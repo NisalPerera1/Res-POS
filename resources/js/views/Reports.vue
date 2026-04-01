@@ -763,3 +763,222 @@ onActivated(() => {
   loadTransactions()
 })
 </script>
+
+<style scoped>
+/* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+  .reports-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .date-range-picker {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+  
+  .quick-presets {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .quick-presets button {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+  
+  .custom-date-range {
+    justify-content: center;
+    gap: 6px;
+  }
+  
+  .custom-date-range input {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+  
+  .load-button {
+    width: 100%;
+    margin-top: 8px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 8px;
+  }
+  
+  .stat-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+  
+  .stat-label {
+    font-size: 10px;
+  }
+  
+  .stat-value {
+    font-size: 14px;
+  }
+  
+  .stat-sub {
+    font-size: 8px;
+  }
+  
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .chart-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+  
+  .chart-title {
+    font-size: 12px;
+  }
+  
+  .data-tables {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .table-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+  
+  .table-title {
+    font-size: 12px;
+  }
+  
+  .table-content {
+    font-size: 10px;
+  }
+  
+  .transactions-modal {
+    width: 95%;
+    max-width: 95%;
+    margin: 2.5% auto;
+    max-height: 95vh;
+  }
+  
+  .modal-body {
+    padding: 12px;
+  }
+  
+  .transaction-item {
+    padding: 8px;
+    border-radius: 8px;
+  }
+  
+  .transaction-amount {
+    font-size: 12px;
+  }
+  
+  .transaction-details {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .reports-header {
+    padding: 8px 12px;
+  }
+  
+  h1 {
+    font-size: 16px !important;
+  }
+  
+  .quick-presets {
+    gap: 2px;
+  }
+  
+  .quick-presets button {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+  
+  .custom-date-range input {
+    font-size: 11px;
+    padding: 3px 5px;
+  }
+  
+  .load-button {
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 6px;
+  }
+  
+  .stat-card {
+    padding: 10px;
+    border-radius: 10px;
+  }
+  
+  .stat-label {
+    font-size: 9px;
+  }
+  
+  .stat-value {
+    font-size: 13px;
+  }
+  
+  .stat-sub {
+    font-size: 7px;
+  }
+  
+  .chart-card {
+    padding: 10px;
+    border-radius: 10px;
+  }
+  
+  .chart-title {
+    font-size: 11px;
+  }
+  
+  .table-card {
+    padding: 10px;
+    border-radius: 10px;
+  }
+  
+  .table-title {
+    font-size: 11px;
+  }
+  
+  .table-content {
+    font-size: 9px;
+  }
+  
+  .transactions-modal {
+    width: 98%;
+    max-width: 98%;
+    margin: 1% auto;
+    max-height: 98vh;
+  }
+  
+  .modal-body {
+    padding: 8px;
+  }
+  
+  .transaction-item {
+    padding: 6px;
+    border-radius: 6px;
+  }
+  
+  .transaction-amount {
+    font-size: 11px;
+  }
+  
+  .transaction-details {
+    font-size: 9px;
+  }
+}
+</style>

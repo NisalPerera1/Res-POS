@@ -1264,3 +1264,194 @@ async function saveModifierPricing() {
 // ── Init ──────────────────────────────────────────────────
 onMounted(loadAll)
 </script>
+
+<style scoped>
+/* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+  .menu-manager-layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    max-width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #252B38;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  
+  .sidebar ul {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 8px;
+  }
+  
+  .sidebar li {
+    width: auto;
+    margin: 0;
+  }
+  
+  .sidebar button {
+    width: auto;
+    padding: 8px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  
+  .main-content {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .content-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .header-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .header-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .search-bar {
+    width: 100%;
+  }
+  
+  .items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .item-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+  
+  .item-image {
+    width: 80px;
+    height: 66px;
+    font-size: 24px;
+  }
+  
+  .item-name {
+    font-size: 12px;
+  }
+  
+  .item-price {
+    font-size: 11px;
+  }
+  
+  .modal-content {
+    width: 95%;
+    max-width: 95%;
+    margin: 2.5% auto;
+    max-height: 95vh;
+  }
+  
+  .modal-body {
+    padding: 16px;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .form-group {
+    margin-bottom: 12px;
+  }
+  
+  .form-group label {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .form-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    max-height: 150px;
+  }
+  
+  .sidebar ul {
+    padding: 6px;
+    gap: 2px;
+  }
+  
+  .sidebar button {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  
+  .items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    padding: 8px;
+  }
+  
+  .item-card {
+    padding: 8px;
+    border-radius: 8px;
+  }
+  
+  .item-image {
+    width: 70px;
+    height: 58px;
+    font-size: 20px;
+  }
+  
+  .item-name {
+    font-size: 11px;
+  }
+  
+  .item-price {
+    font-size: 10px;
+  }
+  
+  .modal-content {
+    width: 98%;
+    max-width: 98%;
+    margin: 1% auto;
+    max-height: 98vh;
+  }
+  
+  .modal-body {
+    padding: 12px;
+  }
+  
+  .form-group label {
+    font-size: 11px;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+</style>
