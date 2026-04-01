@@ -438,8 +438,8 @@
         <div style="display:flex; justify-content:space-between; font-size:12px; color:#64748B; margin-bottom:3px;">
           <span>Subtotal</span><span>Rs. {{ currentOrder?.subtotal ?? '0.00' }}</span>
         </div>
-        <div style="display:flex; justify-content:space-between; font-size:12px; color:#64748B; margin-bottom:3px;">
-          <span>Tax (0%)</span><span>Rs. 0.00</span>
+        <div v-if="currentOrder?.tax_rate > 0" style="display:flex; justify-content:space-between; font-size:12px; color:#64748B; margin-bottom:3px;">
+          <span>Tax ({{ currentOrder?.tax_rate ?? 0 }}%)</span><span>Rs. {{ currentOrder?.tax_amount ?? '0.00' }}</span>
         </div>
         <div style="display:flex; justify-content:space-between; font-weight:700; font-size:15px;
                     border-top:1px solid #252B38; padding-top:8px; margin-top:6px;">
@@ -870,12 +870,11 @@ async function onPaid() {
   orderStore.clearOrder()
   customerName.value = ''
   selectedType.value = 'takeaway'
-  await loadPendingKotOrders()
   
-  // Reload page to ensure paid order is removed from pending list
+  // Reload the page to refresh pending orders list
   setTimeout(() => {
-    window.location.href = '/tables'
-  }, 500)
+    window.location.reload()
+  }, 1500)
 }
 
 // ── Delete ────────────────────────────────────────────────

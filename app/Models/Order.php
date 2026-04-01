@@ -42,6 +42,11 @@ class Order extends Model
 
     public function recalculate(float $taxRate = 10.0): void
     {
+        // Use 0% tax for direct orders (no table_id)
+        if ($this->table_id === null) {
+            $taxRate = 0.0;
+        }
+        
         $subtotal = $this->activeItems->sum('total_price');
         $taxAmount = round($subtotal * ($taxRate / 100), 2);
 

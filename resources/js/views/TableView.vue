@@ -392,7 +392,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onActivated, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, onActivated, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 
@@ -660,6 +660,22 @@ async function closeTable(table) {
 }
 
 // ── Load Tables Function ───────────────────────────────
+const refreshInterval = ref(null)
+
+onMounted(async () => {
+  await loadTables()
+  // Start auto-refresh for real-time revenue updates
+  refreshInterval.value = setInterval(() => {
+    loadTables()
+  }, 30000) // Refresh every 30 seconds
+})
+
+onUnmounted(() => {
+  if (refreshInterval.value) {
+    clearInterval(refreshInterval.value)
+  }
+})
+
 async function loadTables() {
   console.log('Loading tables...')
   try {
