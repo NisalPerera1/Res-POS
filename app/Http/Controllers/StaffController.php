@@ -80,11 +80,13 @@ class StaffController extends Controller
             'role'               => 'required|in:admin,manager,cashier,waiter,kitchen,bartender,delivery',
             'phone'              => 'nullable|string|max:20',
             'email'              => 'nullable|email|max:100',
+            'address'            => 'nullable|string|max:255',
             'salary_type'        => 'in:monthly,daily,hourly',
             'base_salary'        => 'nullable|numeric|min:0',
-            'hourly_rate'        => 'nullable|numeric|min:0',
             'service_charge_pct' => 'nullable|numeric|min:0|max:100',
             'join_date'          => 'nullable|date',
+            'bank_name'          => 'nullable|string|max:100',
+            'bank_account'       => 'nullable|string|max:50',
         ]);
 
         // Check PIN not already used
@@ -96,10 +98,20 @@ class StaffController extends Controller
         }
 
         $staff = User::create([
-            ...$request->except('pin'),
-            'pin'         => Hash::make($request->pin),
-            'employee_id' => User::generateEmployeeId(),
-            'is_active'   => true,
+            'name'               => $request->name,
+            'pin'                => Hash::make($request->pin),
+            'role'               => $request->role,
+            'phone'              => $request->phone,
+            'email'              => $request->email,
+            'address'            => $request->address,
+            'salary_type'        => $request->salary_type ?? 'monthly',
+            'base_salary'        => $request->base_salary ?? 0,
+            'service_charge_pct' => $request->service_charge_pct ?? 0,
+            'join_date'          => $request->join_date,
+            'bank_name'          => $request->bank_name,
+            'bank_account'       => $request->bank_account,
+            'employee_id'        => User::generateEmployeeId(),
+            'is_active'          => true,
         ]);
 
         return response()->json(array_merge($staff->toArray(), [
@@ -114,12 +126,14 @@ class StaffController extends Controller
             'role'               => 'sometimes|in:admin,manager,cashier,waiter,kitchen,bartender,delivery',
             'phone'              => 'nullable|string|max:20',
             'email'              => 'nullable|email|max:100',
+            'address'            => 'nullable|string|max:255',
             'salary_type'        => 'in:monthly,daily,hourly',
             'base_salary'        => 'nullable|numeric|min:0',
-            'hourly_rate'        => 'nullable|numeric|min:0',
             'service_charge_pct' => 'nullable|numeric|min:0|max:100',
             'join_date'          => 'nullable|date',
             'is_active'          => 'boolean',
+            'bank_name'          => 'nullable|string|max:100',
+            'bank_account'       => 'nullable|string|max:50',
         ]);
 
         $staff = User::findOrFail($id);
@@ -298,10 +312,12 @@ class StaffController extends Controller
         try {
             $stats = $this->getMonthStats($id, $year, $month);
 
-            // Total service charges collected that month
+            // Total service charges collected that month (tax_amount represents service charge)
+            // Using same logic as ReportController
             $totalServiceCharge = Order::whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
                 ->where('payment_status', 'paid')
+                ->whereNotNull('table_id') // Only table orders have service charge
                 ->sum('tax_amount');
 
             // Count active staff that month (who worked at least 1 shift)
@@ -473,10 +489,12 @@ class StaffController extends Controller
                 'status'      => $s->status,
             ]);
 
-        // Service charge this month
+        // Service charge this month (tax_amount represents service charge)
+        // Using same logic as ReportController
         $serviceChargeMonth = Order::whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)
             ->where('payment_status', 'paid')
+            ->whereNotNull('table_id') // Only table orders have service charge
             ->sum('tax_amount');
 
         // Per-staff service charge share this month
@@ -547,6 +565,7 @@ class StaffController extends Controller
         $serviceTotal = Order::whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->where('payment_status', 'paid')
+            ->whereNotNull('table_id') // Only table orders have service charge
             ->sum('tax_amount');
 
         $activeCount = Shift::whereYear('shift_date', $year)

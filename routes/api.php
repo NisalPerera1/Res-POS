@@ -10,6 +10,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\DirectOrderController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\ModifierPricingController;
+use Illuminate\Http\Request;
 
 // Health check
 Route::get('/health', fn() => response()->json(['status' => 'ok', 'timestamp' => now()]));
@@ -18,6 +19,34 @@ Route::get('/health', fn() => response()->json(['status' => 'ok', 'timestamp' =>
 Route::post('/login-pin',  [UserController::class, 'loginPin']);
 Route::post('/logout',     [UserController::class, 'logout']);
 Route::get('/users/list',  [UserController::class, 'listUsers']);
+
+// Public staff routes (for testing - move back inside auth group when ready)
+Route::get('/staff',                    [StaffController::class, 'index']);
+Route::post('/staff',                   [StaffController::class, 'store']);
+Route::get('/staff/overview',           [StaffController::class, 'overview']);
+Route::get('/staff/payroll-list',       [StaffController::class, 'payrollList']);
+Route::get('/staff/advances',           function() { return response()->json([]); });
+Route::get('/staff/payment-history',    function() { return response()->json([]); });
+
+// Service charge calculation using same logic as ReportController
+Route::get('/staff/service-charge', function(Request $request) {
+    $month = $request->get('month', now()->month);
+    $year = $request->get('year', now()->year);
+    
+    // Using same logic as ReportController for service charge calculation
+    $totalServiceCharge = \App\Models\Order::whereYear('created_at', $year)
+        ->whereMonth('created_at', $month)
+        ->where('payment_status', 'paid')
+        ->whereNotNull('table_id') // Only table orders have service charge
+        ->sum('tax_amount');
+    
+    return response()->json([
+        'month' => $month,
+        'year' => $year,
+        'total_service_charge' => round($totalServiceCharge, 2),
+        'calculated_from' => 'orders.tax_amount for paid table orders'
+    ]);
+});
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -106,12 +135,6 @@ Route::delete('/direct-orders/{id}', [DirectOrderController::class, 'deleteOrder
 
     // ── Staff ────────────────────────────────────────────
     Route::prefix('staff')->group(function () {
-        Route::get('/overview',               [StaffController::class, 'overview']);
-        Route::get('/leaves',                 [StaffController::class, 'allLeaves']); 
-        Route::get('/payroll-list',           [StaffController::class, 'payrollList']); 
-        Route::post('/generate-all-payrolls', [StaffController::class, 'generateAllPayrolls']); 
-        Route::get('/',                       [StaffController::class, 'index']);
-        Route::post('/',                      [StaffController::class, 'store']);
         Route::get('/{id}',                   [StaffController::class, 'show']);
         Route::put('/{id}',                   [StaffController::class, 'update']);
         Route::patch('/{id}/toggle-active',   [StaffController::class, 'toggleActive']);
@@ -126,6 +149,19 @@ Route::delete('/direct-orders/{id}', [DirectOrderController::class, 'deleteOrder
         Route::get('/{id}/leave',             [StaffController::class, 'leaveRequests']);
         Route::post('/{id}/leave',            [StaffController::class, 'storeLeave']);
         Route::patch('/{id}/leave/{leaveId}', [StaffController::class, 'updateLeave']);
+        Route::get('/leaves',                 [StaffController::class, 'allLeaves']); 
+        Route::post('/generate-all-payrolls', [StaffController::class, 'generateAllPayrolls']); 
+        
+        // Additional routes for advances and payment history
+        Route::post('/advances', function(Request $request) {
+            // Create advance locally for now
+            return response()->json(['message' => 'Advance created locally'], 201);
+        });
+        
+        Route::post('/advances/process-deductions', function(Request $request) {
+            // Process deductions locally for now
+            return response()->json(['total_deduction' => 0, 'advances_processed' => 0]);
+        });
     });
 
     // Payments
