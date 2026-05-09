@@ -1,0 +1,236 @@
+/* Theme Variables - Light & Dark Mode */
+
+/* Dark Theme (Default) */
+:root {
+  --bg-primary: #0A0C10;
+  --bg-secondary: #12151C;
+  --bg-tertiary: #1A1E28;
+  --bg-card: #1A1E28;
+  --bg-deep: #0F1419;
+  --border-color: #252B38;
+  --border-hover: #334155;
+  --text-primary: #F1F5F9;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+  --text-inverse: #1A1E28;
+  --accent-color: #F59E0B;
+  --accent-hover: #D97706;
+  --success-color: #10B981;
+  --success-hover: #059669;
+  --error-color: #EF4444;
+  --error-hover: #DC2626;
+  --warning-color: #F59E0B;
+  --warning-hover: #D97706;
+  --info-color: #3B82F6;
+  --info-hover: #2563EB;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Light Theme */
+.light-theme {
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F8FAFC;
+  --bg-tertiary: #F1F5F9;
+  --bg-card: #FFFFFF;
+  --bg-deep: #F8FAFC;
+  --border-color: #E2E8F0;
+  --border-hover: #CBD5E1;
+  --text-primary: #1A1E28;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+  --text-inverse: #F1F5F9;
+  --accent-color: #F59E0B;
+  --accent-hover: #D97706;
+  --success-color: #10B981;
+  --success-hover: #059669;
+  --error-color: #EF4444;
+  --error-hover: #DC2626;
+  --warning-color: #F59E0B;
+  --warning-hover: #D97706;
+  --info-color: #3B82F6;
+  --info-hover: #2563EB;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Global styles that use theme variables */
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* Common component styles */
+.btn {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  transition: all 0.15s ease;
+}
+
+.btn:hover {
+  background: var(--bg-card);
+  border-color: var(--border-hover);
+}
+
+.btn-primary {
+  background: var(--accent-color);
+  color: var(--text-inverse);
+  border-color: var(--accent-color);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn-success {
+  background: var(--success-color);
+  color: #FFFFFF;
+  border-color: var(--success-color);
+}
+
+.btn-success:hover {
+  background: var(--success-hover);
+  border-color: var(--success-hover);
+}
+
+.btn-danger {
+  background: var(--error-color);
+  color: #FFFFFF;
+  border-color: var(--error-color);
+}
+
+.btn-danger:hover {
+  background: var(--error-hover);
+  border-color: var(--error-hover);
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.input {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  transition: border-color 0.15s ease;
+}
+
+.input:focus {
+  border-color: var(--accent-color);
+  outline: none;
+}
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-accent {
+  color: var(--accent-color);
+}
+
+.text-success {
+  color: var(--success-color);
+}
+
+.text-error {
+  color: var(--error-color);
+}
+
+.text-warning {
+  color: var(--warning-color);
+}
+
+.text-info {
+  color: var(--info-color);
+}
+
+.bg-primary {
+  background: var(--bg-primary);
+}
+
+.bg-secondary {
+  background: var(--bg-secondary);
+}
+
+.bg-tertiary {
+  background: var(--bg-tertiary);
+}
+
+.bg-accent {
+  background: var(--accent-color);
+}
+
+.bg-success {
+  background: var(--success-color);
+}
+
+.bg-error {
+  background: var(--error-color);
+}
+
+.bg-warning {
+  background: var(--warning-color);
+}
+
+.bg-info {
+  background: var(--info-color);
+}
+
+.border-primary {
+  border-color: var(--border-color);
+}
+
+.border-accent {
+  border-color: var(--accent-color);
+}
+
+.border-success {
+  border-color: var(--success-color);
+}
+
+.border-error {
+  border-color: var(--error-color);
+}
+
+.border-warning {
+  border-color: var(--warning-color);
+}
+
+.border-info {
+  border-color: var(--info-color);
+}

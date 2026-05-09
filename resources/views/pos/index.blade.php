@@ -6,7 +6,7 @@
     <title>Restaurant POS System</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-100">
+<body class="bg-[#0A0C10] text-white" style="margin:0;">
     <div id="app"></div>
 </body>
 </html>

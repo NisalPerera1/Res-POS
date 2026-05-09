@@ -1,0 +1,212 @@
+/* Light Mode Theme Fixes for Components */
+
+/* Kitchen Display Component */
+.kitchen-display {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.kitchen-header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.kitchen-order-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+}
+
+.kitchen-order-header {
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.kitchen-order-items {
+  border-bottom: 1px solid var(--border-hover);
+  color: var(--text-primary);
+}
+
+.kitchen-order-info {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+/* Menu Management Component */
+.menu-manager {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.menu-header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.menu-tabs {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.menu-tab {
+  color: var(--text-secondary);
+}
+
+.menu-tab.active {
+  background: var(--accent-color);
+  color: #000;
+}
+
+.category-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.category-icon {
+  background: var(--bg-tertiary);
+}
+
+.filter-bar {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.form-input {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.form-input:focus {
+  border-color: var(--accent-color);
+}
+
+.btn-edit {
+  background: var(--info-color);
+  color: #fff;
+  border: 1px solid var(--info-color);
+}
+
+.btn-delete {
+  background: var(--error-color);
+  color: #fff;
+  border: 1px solid var(--error-color);
+}
+
+.btn-success {
+  background: var(--success-color);
+  color: #fff;
+  border: 1px solid var(--success-color);
+}
+
+/* Staff Management Component */
+.staff-management {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.staff-header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.staff-tabs {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.staff-tab {
+  color: var(--text-secondary);
+}
+
+.staff-tab.active {
+  background: var(--accent-color);
+  color: #000;
+}
+
+.staff-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+/* Reports Component */
+.reports-container {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.reports-header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.summary-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+/* Common utility classes */
+.text-primary {
+  color: var(--text-primary) !important;
+}
+
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+.bg-primary {
+  background: var(--bg-primary) !important;
+}
+
+.bg-secondary {
+  background: var(--bg-secondary) !important;
+}
+
+.bg-tertiary {
+  background: var(--bg-tertiary) !important;
+}
+
+.bg-card {
+  background: var(--bg-card) !important;
+}
+
+.border-primary {
+  border-color: var(--border-color) !important;
+}
+
+.border-hover {
+  border-color: var(--border-hover) !important;
+}
+
+/* Ensure proper contrast in light mode */
+.light-theme .text-inverse {
+  color: var(--text-primary) !important;
+}
+
+.light-theme .btn-primary {
+  background: var(--accent-color) !important;
+  color: #000 !important;
+}
+
+.light-theme .btn-success {
+  background: var(--success-color) !important;
+  color: #fff !important;
+}
+
+.light-theme .btn-danger {
+  background: var(--error-color) !important;
+  color: #fff !important;
+}
+
+.light-theme .btn-info {
+  background: var(--info-color) !important;
+  color: #fff !important;
+}

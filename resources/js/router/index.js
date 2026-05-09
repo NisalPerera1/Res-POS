@@ -5,7 +5,7 @@ const routes = [
   {
     path: '/login',
     name: 'login',
-    component: () => import('@/views/LoginPIN.vue'),
+    component: () => import('@/views/pages/LoginPIN.vue'),
     meta: { guest: true },
   },
   {
@@ -15,41 +15,48 @@ const routes = [
     children: [
       {
         path: '',
+        name: 'dashboard',
+        component: () => import('@/views/pages/Dashboard.vue'),
+      },
+      {
+        path: 'tables',
         name: 'tables',
-        component: () => import('@/views/TableView.vue'),
+        component: () => import('@/views/components/TableView.vue'),
       },
       {
         path: 'pos/:tableId',
         name: 'pos',
-        component: () => import('@/views/POSScreen.vue'),
+        component: () => import('@/views/components/POSScreen.vue'),
       },
       {
         path: 'pos/direct/:orderId',
         name: 'pos-direct',
-        component: () => import('@/views/POSScreen.vue'),
+        component: () => import('@/views/components/POSScreen.vue'),
       },
       {
         path: 'kitchen',
         name: 'kitchen',
-        component: () => import('@/views/KitchenDisplay.vue'),
+        component: () => import('@/views/components/KitchenDisplay.vue'),
       },
       {
         path: 'direct',
         name: 'direct-order',
-        component: () => import('@/views/DirectOrderSimple.vue'),
+        component: () => import('@/views/components/DirectOrderImproved.vue'),
       },
       {
         path: 'menu',
         name: 'menu',
-        component: () => import('@/views/MenuManager.vue'),
+        component: () => import('@/views/admin/MenuManager.vue'),
       },
       {
         path: 'reports',
         name: 'reports',
-        component: () => import('@/views/Reports.vue'),
+        component: () => import('@/views/admin/Reports.vue'),
       },
 
-{ path: 'staff', name: 'staff', component: () => import('@/views/StaffManagement.vue') },
+{ path: 'staff', name: 'staff', component: () => import('@/views/admin/StaffManagement.vue') },
+      { path: 'recent-orders', name: 'recent-orders', component: () => import('@/views/components/RecentOrders.vue') },
+      { path: 'account-settings', name: 'account-settings', component: () => import('@/views/pages/AccountSettings.vue') },
 
 
 
@@ -58,16 +65,16 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory('/'),
+  history: createWebHistory('/admin'),
   routes,
 })
 
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
-    next('/login')
+    next({ name: 'login' })
   } else if (to.meta.guest && auth.isLoggedIn) {
-    next('/')
+    next({ name: 'dashboard' })
   } else {
     next()
   }

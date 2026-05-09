@@ -24,5 +24,28 @@ class OrderItem extends Model
 
     public function order()    { return $this->belongsTo(Order::class); }
     public function menuItem() { return $this->belongsTo(MenuItem::class); }
+    public function addons()   { return $this->hasMany(OrderItemAddon::class); }
 
+    /**
+     * Get the total price including addons
+     */
+    public function getTotalWithAddonsAttribute(): float
+    {
+        $addonsTotal = $this->addons->sum('total_price');
+        return (float) $this->total_price + $addonsTotal;
+    }
+
+    /**
+     * Get formatted addons display for cart
+     */
+    public function getAddonsDisplayAttribute(): string
+    {
+        if ($this->addons->isEmpty()) {
+            return '';
         }
+
+        return $this->addons->map(function ($addon) {
+            return "+{$addon->addon_name} ({$addon->quantity}{$addon->formatted_unit})";
+        })->implode(', ');
+    }
+}

@@ -79,13 +79,25 @@
                       style="font-size:9px; padding:1px 5px; border-radius:3px;
                              background:#252B38; color:#64748B;">{{ mod.name }}</span>
                   </div>
+                  <div v-if="item.addons && item.addons.length > 0"
+                    style="display:flex; flex-wrap:wrap; gap:2px; margin-top:2px;">
+                    <span v-for="addon in item.addons" :key="addon.id"
+                      style="font-size:9px; padding:1px 5px; border-radius:3px;
+                             background:rgba(245,158,11,0.15); color:#F59E0B; font-weight:600;">
+                      +{{ addon.addon_name }} ({{ addon.quantity }}{{ addon.formatted_unit }})
+                    </span>
+                  </div>
                   <div v-if="item.notes"
                     style="font-size:10px; color:#64748B; margin-top:1px; font-style:italic;">
                     📝 {{ item.notes }}
                   </div>
                 </div>
                 <div style="font-size:12px; color:#94A3B8; margin-left:8px; flex-shrink:0;">
-                  Rs. {{ parseFloat(item.total_price).toFixed(2) }}
+                  Rs. {{ 
+                    (parseFloat(item.total_price || 0) + 
+                    (item.addons ? item.addons.reduce((sum, addon) => sum + parseFloat(addon.total_price || 0), 0) : 0)
+                    ).toFixed(2) 
+                  }}
                 </div>
               </div>
             </div>
@@ -355,13 +367,21 @@
 
       <div style="padding:16px 20px; border-bottom:1px solid #252B38;
                   display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
-        <div style="font-size:15px; font-weight:700; color:#10B981;">✅ Payment Complete</div>
-        <button @click="printReceipt"
-          style="padding:5px 12px; background:rgba(59,130,246,0.1); color:#3B82F6;
-                 border:1px solid rgba(59,130,246,0.3); border-radius:6px;
-                 font-size:11px; font-weight:600; cursor:pointer;">
-          🖨️ Print
-        </button>
+        <div style="font-size:15px; font-weight:700; color:#10B981;"> Payment Complete</div>
+        <div style="display:flex; gap:8px;">
+          <button @click="printReceipt"
+            style="padding:5px 12px; background:rgba(59,130,246,0.1); color:#3B82F6;
+                   border:1px solid rgba(59,130,246,0.3); border-radius:6px;
+                   font-size:11px; font-weight:600; cursor:pointer;">
+            Print
+          </button>
+          <button @click="$emit('receiptClosed')"
+            style="padding:5px 12px; background:rgba(239,68,68,0.1); color:#EF4444;
+                   border:1px solid rgba(239,68,68,0.3); border-radius:6px;
+                   font-size:11px; font-weight:600; cursor:pointer;">
+            Close
+          </button>
+        </div>
       </div>
 
       <div style="flex:1; overflow-y:auto; padding:0;" id="receipt-content">
@@ -518,7 +538,7 @@ import { useOrderStore }            from '@/stores/orders'
 import axios                        from 'axios'
 
 const props = defineProps({ order: Object })
-const emit  = defineEmits(['paid', 'cancel'])
+const emit  = defineEmits(['paid', 'cancel', 'receiptClosed'])
 
 const orderStore = useOrderStore()
 
@@ -549,9 +569,23 @@ const activeItems = computed(() => {
   return items.filter(i => !i.is_void && i.is_void !== 1 && i.is_void !== '1')
 })
 
-const subtotal = computed(() =>
-  parseFloat(props.order?.subtotal ?? 0)
-)
+const subtotal = computed(() => {
+  if (!props.order?.items) return 0
+  
+  return props.order.items.reduce((total, item) => {
+    if (item.is_void || item.is_void === 1 || item.is_void === '1') {
+      return total
+    }
+    
+    // Calculate item total including add-ons
+    const itemTotal = parseFloat(item.total_price || 0)
+    const addonsTotal = item.addons ? item.addons.reduce((addonSum, addon) => {
+      return addonSum + parseFloat(addon.total_price || 0)
+    }, 0) : 0
+    
+    return total + itemTotal + addonsTotal
+  }, 0)
+})
 
 const discount = computed(() =>
   parseFloat(props.order?.discount_amount ?? 0)
@@ -642,7 +676,13 @@ async function processPayment() {
     // Fetch receipt data using saved orderId
     const { data } = await axios.get(`/orders/${orderId}/receipt`)
     receiptData.value = data
+    
+    console.log('=== PAYMENT SUCCESS ===')
+    console.log('Receipt data:', data)
+    console.log('Setting paid.value = true')
     paid.value = true
+    console.log('paid.value is now:', paid.value)
+    console.log('Template should switch to receipt section')
   } catch (e) {
     console.error('Payment error:', e)
     errorMsg.value = e.response?.data?.message ?? e.message ?? 'Payment failed. Please try again.'
@@ -675,13 +715,25 @@ function printReceipt() {
       ${r?.order?.customer_name ? `<div class="row"><span class="m">Customer</span><span>${r.order.customer_name}</span></div>` : ''}
       <div class="row"><span class="m">Cashier</span><span>${r?.receipt?.cashier}</span></div>
       <div class="div"></div>
-      ${(r?.items ?? []).map(i => `
+      ${(r?.items ?? []).map(i => {
+        const itemTotal = parseFloat(i.total_price || 0)
+        const addonsTotal = i.addons ? i.addons.reduce((sum, addon) => sum + parseFloat(addon.total_price || 0), 0) : 0
+        const totalWithAddons = itemTotal + addonsTotal
+        
+        return `
         <div class="row">
           <span>${i.quantity}x ${i.name}${i.modifiers?.length ? ' (' + i.modifiers.map(m => m.name).join(', ') + ')' : ''}</span>
-          <span>$${i.total_price}</span>
+          <span>$${totalWithAddons.toFixed(2)}</span>
         </div>
+        ${i.addons && i.addons.length > 0 ? i.addons.map(addon => 
+          `<div class="row" style="font-size:10px;color:#666;padding-left:20px;">
+            <span>+${addon.addon_name} (${addon.quantity}${addon.formatted_unit})</span>
+            <span>$${parseFloat(addon.total_price || 0).toFixed(2)}</span>
+          </div>`
+        ).join('') : ''}
         ${i.notes ? `<div class="m" style="font-size:10px;padding-left:8px">* ${i.notes}</div>` : ''}
-      `).join('')}
+        `
+      }).join('')}
       <div class="div"></div>
       <div class="row"><span class="m">Subtotal</span><span>$${r?.totals?.subtotal}</span></div>
       <div class="row">

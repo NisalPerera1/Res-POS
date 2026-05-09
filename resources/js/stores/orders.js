@@ -102,6 +102,8 @@ export const useOrderStore = defineStore('orders', () => {
     try {
       const { data } = await axios.post(`/orders/${orderId}/items`, payload)
       const order = data.order ?? data
+      
+            
       setOrder(order)
       return data
     } catch (e) {

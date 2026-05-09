@@ -10,7 +10,7 @@ class Table extends Model
 
     protected $fillable = [
         'name', 'section', 'capacity', 'status', 'current_order_id', 
-        'sort_order', 'customer_name', 'notes'
+        'sort_order', 'customer_name', 'notes', 'image'
     ];
 
     protected $casts = [

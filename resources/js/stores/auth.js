@@ -13,8 +13,8 @@ export const useAuthStore = defineStore('auth', () => {
   let logoutTimer = null
 
   const isLoggedIn = computed(() => !!token.value)
-  const isAdmin    = computed(() => user.value?.role === 'admin')
-  const isKitchen  = computed(() => user.value?.role === 'kitchen')
+  const isAdmin    = computed(() => (user.value?.role ?? '').toLowerCase() === 'admin')
+  const isKitchen  = computed(() => (user.value?.role ?? '').toLowerCase() === 'kitchen')
   const isSessionExpired = computed(() => {
     if (!isLoggedIn.value) return false
     const now = Date.now()

@@ -7,7 +7,7 @@ import { useOrderStore } from './stores/orders'
 import '../css/app.css'
 
 // ── Axios global config ──────────────────────────────
-axios.defaults.baseURL = '/api'
+axios.defaults.baseURL = 'http://127.0.0.1:8000/api'
 axios.defaults.headers.common['Accept']       = 'application/json'
 axios.defaults.headers.common['Content-Type'] = 'application/json'
 axios.defaults.withCredentials = false
@@ -32,7 +32,7 @@ axios.interceptors.response.use(
         localStorage.removeItem('pos_token')
         localStorage.removeItem('pos_user')
         delete axios.defaults.headers.common['Authorization']
-        window.location.href = '/login'
+        window.location.href = '/admin/login'
       }
     }
     return Promise.reject(error)

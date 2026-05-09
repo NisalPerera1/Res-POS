@@ -8,7 +8,8 @@
     >
       <div style="background:#1A1E28; border:1px solid #252B38; border-radius:16px;
                   width:100%; max-width:440px; max-height:88vh;
-                  display:flex; flex-direction:column; overflow:hidden;">
+                  display:flex; flex-direction:column; overflow:hidden;
+                  margin: auto; transform: translateZ(0);">
 
         <!-- Header -->
         <div style="padding:16px 18px; border-bottom:1px solid #252B38;

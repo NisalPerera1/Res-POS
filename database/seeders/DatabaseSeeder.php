@@ -9,15 +9,16 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // USERS
-        $users = [
-            ['name' => 'Admin User',    'pin' => Hash::make('1234'), 'role' => 'admin',    'color' => '#EF4444'],
-            ['name' => 'Carlos Rivera', 'pin' => Hash::make('2222'), 'role' => 'cashier',  'color' => '#3B82F6'],
-            ['name' => 'Sophie Lee',    'pin' => Hash::make('3333'), 'role' => 'waiter',   'color' => '#10B981'],
-            ['name' => 'Ahmed Khan',    'pin' => Hash::make('4444'), 'role' => 'kitchen',  'color' => '#F59E0B'],
-            ['name' => 'Maria Santos',  'pin' => Hash::make('5555'), 'role' => 'waiter',   'color' => '#8B5CF6'],
+        // USERS - Create admin user only for initial setup
+        // Additional users should be created through the admin interface
+        $adminUser = [
+            'name' => 'System Admin', 
+            'pin' => Hash::make('admin123'), 
+            'role' => 'admin', 
+            'color' => '#F59E0B',
+            'is_active' => true
         ];
-        foreach ($users as $u) User::create($u);
+        User::create($adminUser);
 
         // TABLES
         $tables = [

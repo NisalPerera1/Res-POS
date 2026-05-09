@@ -1,23 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+@import "./theme.css";
+@import "./light-theme-fixes.css";
 
 @layer base {
   html, body {
     height: 100%;
-    background-color: #0A0C10;
-    color: #F1F5F9;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     margin: 0;
     padding: 0;
     font-family: 'DM Sans', system-ui, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   #app {
     height: 100%;
     min-height: 100vh;
-    background-color: #0A0C10;
+    background-color: var(--bg-primary);
+    transition: background-color 0.3s ease;
   }
 
   * {
@@ -25,19 +26,210 @@
   }
 
   ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--bg-secondary);
   }
   ::-webkit-scrollbar-thumb {
-    background: #334155;
-    border-radius: 2px;
+    background: var(--border-color);
+    border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #475569;
+    background: var(--border-hover);
   }
+}
+
+/* CSS Variables */
+:root {
+  --spice: #D85A30;
+  --spice-dim: rgba(216,90,48,0.12);
+  --ink: #08080A;
+  --ink-2: #141418;
+  --ink-3: #1A1C24;
+  --ink-4: #1E1E2A;
+  --t1: #F8F8F6;
+  --t2: rgba(248,248,246,.58);
+  --t3: rgba(248,248,246,.32);
+}
+
+/* Navigation Component Styles */
+.tz-nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  height: 64px;
+  background: rgba(8, 8, 10, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(16px);
+}
+
+.tz-nav__inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 48px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+  .tz-nav__inner {
+    padding: 0 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .tz-nav__inner {
+    padding: 0 16px;
+  }
+}
+
+.tz-nav__logo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.tz-nav__mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--spice);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tz-nav__name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--t1);
+  line-height: 1;
+}
+
+.tz-nav__name span {
+  color: var(--spice);
+}
+
+.tz-nav__sub {
+  font-size: 9px;
+  color: var(--t3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+
+.tz-nav__links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+@media (max-width: 680px) {
+  .tz-nav__links {
+    display: none;
+  }
+}
+
+.tz-nav__link {
+  font-family: 'Montserrat', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--t2);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.tz-nav__link:hover {
+  color: var(--t1);
+}
+
+.tz-nav__link.text-white {
+  color: var(--t1);
+}
+
+.tz-nav__cta {
+  background: var(--spice);
+  color: #0d0d0d;
+  font-family: 'Montserrat', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 9px 20px;
+  border-radius: 9999px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tz-nav__cta:hover {
+  background: #bf4e26;
+  transform: translateY(-1px);
+}
+
+/* Mobile Navigation */
+.tz-nav__hamburger {
+  display: none;
+}
+
+@media (max-width: 680px) {
+  .tz-nav__hamburger {
+    display: flex;
+  }
+}
+
+.tz-nav__mask {
+  pointer-events: none;
+}
+
+.tz-nav__drawer {
+  transform: translateX(100%);
+}
+
+/* Ham open state */
+.ham-open span:nth-child(1) { 
+  transform: rotate(45deg) translate(5px,5px); 
+}
+.ham-open span:nth-child(2) { 
+  opacity: 0; 
+}
+.ham-open span:nth-child(3) { 
+  transform: rotate(-45deg) translate(5px,-5px); 
+}
+
+/* Fix hamburger span colors */
+.tz-nav__hamburger span {
+  background: var(--t1);
+}
+
+/* Navigation SVG icon fixes */
+.tz-nav svg { 
+  width: 18px; 
+  height: 18px; 
+}
+.tz-nav__mark svg { 
+  width: 18px; 
+  height: 18px; 
+}
+.tz-nav__link svg { 
+  width: 16px; 
+  height: 16px; 
+}
+
+/* Font classes for navigation */
+.font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.font-ui {
+  font-family: 'Montserrat', system-ui, sans-serif;
 }
 
 /* Ensure inline styles work properly */
@@ -45,5 +237,6 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #0A0C10;
+  background: var(--bg-primary);
+  transition: background-color 0.3s ease;
 }
