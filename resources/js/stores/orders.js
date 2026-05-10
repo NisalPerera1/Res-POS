@@ -131,9 +131,9 @@ export const useOrderStore = defineStore('orders', () => {
   // ── voidItem ──────────────────────────────────────────
   async function voidItem(orderId, itemId) {
     try {
-      // Use PATCH (matches route definition)
-      const { data } = await axios.patch(
-        `/orders/${orderId}/items/${itemId}/void`
+      // Use DELETE (matches backend removeItem method)
+      const { data } = await axios.delete(
+        `/orders/${orderId}/items/${itemId}`
       )
       const order = data.order ?? data
       setOrder(order)

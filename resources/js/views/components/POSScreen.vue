@@ -199,6 +199,11 @@
                     }"
                     @click="advanceStatus(item)"
                   >{{ item.status === 'preparing' ? '✓ Ready' : '✓ Served' }}</button>
+                  <button
+                    class="remove-btn"
+                    @click="voidOrderItem(item)"
+                    title="Remove item from cart"
+                  >✕</button>
                 </div>
               </div>
             </div>
@@ -349,6 +354,11 @@
                     }"
                     @click="advanceStatus(item)"
                   >{{ item.status === 'preparing' ? '✓ Ready' : '✓ Served' }}</button>
+                  <button
+                    class="remove-btn"
+                    @click="voidOrderItem(item)"
+                    title="Remove item from cart"
+                  >✕</button>
                 </div>
               </div>
             </div>
