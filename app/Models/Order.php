@@ -40,7 +40,7 @@ class Order extends Model
         return $this->hasMany(OrderItem::class)->where('is_void', false)->where('status', 'pending');
     }
 
-    public function recalculate(float $taxRate = 10.0): void
+    public function recalculate(float $taxRate = 0.0): void
     {
         // Use 0% tax for direct orders (no table_id)
         if ($this->table_id === null) {

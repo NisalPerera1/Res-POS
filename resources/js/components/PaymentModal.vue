@@ -226,7 +226,7 @@
                 Service Charge
               </span>
               <span style="font-size:12px; color:#10B981;">
-                Waived (Direct Order)
+                {{ serviceChargeRate.value === 0 ? 'Waived' : `${serviceChargeRate.value}%` }}
               </span>
             </div>
             <div v-if="discount > 0"
@@ -569,6 +569,11 @@ const activeItems = computed(() => {
   return items.filter(i => !i.is_void && i.is_void !== 1 && i.is_void !== '1')
 })
 
+const serviceChargeRate = computed(() => {
+  // Use service charge rate from order data, default to 0 for direct orders
+  return props.order?.table_id ? (props.order?.service_charge_rate ?? 0) : 0
+})
+
 const subtotal = computed(() => {
   if (!props.order?.items) return 0
   
@@ -592,7 +597,7 @@ const discount = computed(() =>
 )
 
 const localTaxAmount = computed(() =>
-  Math.round(subtotal.value * (localTaxRate.value / 100) * 100) / 100
+  Math.round(subtotal.value * (serviceChargeRate.value / 100) * 100) / 100
 )
 
 const localTotal = computed(() =>

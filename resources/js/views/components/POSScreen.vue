@@ -242,7 +242,7 @@
             <span>Rs. {{ currentOrder?.subtotal ?? '0.00' }}</span>
           </div>
           <div class="total-row">
-            <span>Service (10%)</span>
+            <span>Service ({{ currentOrder?.service_charge_rate ?? 0 }}%)</span>
             <span>Rs. {{ currentOrder?.tax_amount ?? '0.00' }}</span>
           </div>
           <div class="total-row total-row--grand">
@@ -394,7 +394,7 @@
             <span>Rs. {{ currentOrder?.subtotal ?? '0.00' }}</span>
           </div>
           <div class="total-row">
-            <span>Service (10%)</span>
+            <span>Service ({{ currentOrder?.service_charge_rate ?? 0 }}%)</span>
             <span>Rs. {{ currentOrder?.tax_amount ?? '0.00' }}</span>
           </div>
           <div class="total-row total-row--grand">

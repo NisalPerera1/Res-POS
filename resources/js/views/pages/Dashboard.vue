@@ -32,7 +32,7 @@
         </router-link>
         <router-link :to="{ name: 'direct-order' }" class="qs-btn qs-blue">
           <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 5h10M3 8h7M3 11h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          Direct Order
+          Takeaway Order
         </router-link>
         <router-link :to="{ name: 'kitchen' }" class="qs-btn qs-amber">
           <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>

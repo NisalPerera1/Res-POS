@@ -13,7 +13,7 @@
           🍽️
         </div>
         <div>
-          <div style="font-weight:700; font-size:18px; color:#000;">RestoPOS</div>
+          <div style="font-weight:700; font-size:18px; color:#000;">CoreLogixPOS</div>
           <div style="font-size:12px; color:rgba(0,0,0,0.7);">Restaurant Management</div>
         </div>
       </div>
@@ -30,7 +30,7 @@
           <div style="display:flex; flex-direction:column; gap:2px;">
             <NavBtn :to="{ name: 'dashboard' }"     icon="dashboard"  label="Dashboard"  :wide="true" />
             <NavBtn :to="{ name: 'tables' }"        icon="grid"       label="Tables"     :wide="true" />
-            <NavBtn :to="{ name: 'direct-order' }" icon="arrow"      label="Direct Order" :wide="true" />
+            <NavBtn :to="{ name: 'direct-order' }" icon="arrow"      label="Takeaway Order" :wide="true" />
             <NavBtn :to="{ name: 'kitchen' }"      icon="chef"       label="Kitchen"    :wide="true" />
           </div>
         </div>

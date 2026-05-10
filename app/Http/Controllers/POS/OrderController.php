@@ -49,13 +49,15 @@ class OrderController extends Controller
             'guests'         => 'nullable|integer|min:1',
             'customer_name'  => 'nullable|string|max:100',
             'customer_notes' => 'nullable|string|max:500',
+            'service_charge_rate' => 'nullable|numeric|min:0|max:100',
         ]);
 
         DB::beginTransaction();
         try {
             // Determine service charge based on order type
             $isDirectOrder = is_null($request->table_id);
-            $taxRate = $isDirectOrder ? 0 : 10; // 0% for direct orders, 10% for table orders
+            $taxRate = $isDirectOrder ? 0 : 0; // Default to 0% for both table and direct orders
+            $serviceChargeRate = $request->service_charge_rate ?? 0; // Allow custom service charge rate
             
             $order = Order::create([
                 'order_number'    => Order::generateOrderNumber(),
@@ -69,9 +71,10 @@ class OrderController extends Controller
                 'tax_amount'      => 0,
                 'discount_amount' => 0,
                 'total'           => 0,
-                'payment_status'  => 'unpaid',
+                'payment_status' => 'unpaid',
                 'customer_name'   => $request->customer_name,
-                'customer_notes'  => $request->customer_notes,
+                'customer_notes' => $request->customer_notes,
+                'service_charge_rate' => $serviceChargeRate, // Store the service charge rate
             ]);
 
             // ✅ Link table to order
@@ -282,7 +285,7 @@ public function storeDirect(Request $request)
             'status'          => 'pending',
             'guests'          => 1,
             'subtotal'        => 0,
-            'tax_rate'        => 10,
+            'tax_rate'        => 0,
             'tax_amount'      => 0,
             'discount_amount' => 0,
             'total'           => 0,
