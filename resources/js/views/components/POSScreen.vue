@@ -700,9 +700,11 @@ async function decreaseQty(item) {
 }
 
 async function voidOrderItem(item) {
-  if (item.kot_round && !confirm(`"${item.item_name}" was already sent to kitchen. Remove anyway?`)) return
-  try { await orderStore.voidItem(currentOrder.value.id, item.id); showToast('Item removed', 'success') }
-  catch { showToast('Failed to remove item', 'error') }
+  // Allow removal of items even after KOT is sent (for customer changes, etc.)
+  try { 
+    await orderStore.voidItem(currentOrder.value.id, item.id); 
+    showToast('Item removed', 'success') 
+  } catch { showToast('Failed to remove item', 'error') }
 }
 
 async function sendKOT() {

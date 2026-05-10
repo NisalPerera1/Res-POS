@@ -685,12 +685,8 @@ public function updateServiceCharge(Request $request, $id)
         $order = Order::findOrFail($id);
         $item = $order->items()->findOrFail($itemId);
 
-        // Only allow removing items that haven't been sent to kitchen
-        if ($item->kot_round) {
-            return response()->json([
-                'message' => 'Cannot remove item that has been sent to kitchen'
-            ], 422);
-        }
+        // Allow removing items even after KOT is sent (for customer changes, etc.)
+        // Note: Items will be voided and removed from order totals
 
         $item->delete();
         $order->recalculate($order->tax_rate);
