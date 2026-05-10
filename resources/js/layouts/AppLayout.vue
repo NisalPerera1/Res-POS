@@ -1,9 +1,31 @@
 <template>
-  <div style="display:flex; height:100vh; overflow:hidden; background:var(--bg-primary);">
+  <div style="display:flex; height:100vh; overflow:hidden; background:var(--bg-primary);" class="app-layout">
+
+    <!-- Mobile Menu Toggle -->
+    <button 
+      @click="toggleSidebar" 
+      class="mobile-menu-toggle"
+      :class="{ 'sidebar-open': sidebarOpen }"
+      title="Toggle Menu"
+    >
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 6h14M3 10h14M3 14h14"/>
+      </svg>
+    </button>
+
+    <!-- Mobile Overlay -->
+    <div 
+      v-if="sidebarOpen" 
+      class="mobile-overlay" 
+      @click="closeSidebar"
+    ></div>
 
     <!-- Sidebar -->
-    <aside style="width:240px; background:var(--bg-secondary); border-right:1px solid var(--border-color);
-                  display:flex; flex-direction:column; padding:16px; gap:8px; flex-shrink:0; height:100vh; overflow-y:auto; min-height:600px;">
+    <aside 
+      class="sidebar"
+      :class="{ 'sidebar-open': sidebarOpen }"
+      style="width:240px; background:var(--bg-secondary); border-right:1px solid var(--border-color);
+                    display:flex; flex-direction:column; padding:16px; gap:8px; flex-shrink:0; height:100vh; overflow-y:auto; min-height:600px;">
 
       <!-- Brand -->
       <div style="display:flex; align-items:center; gap:12px; padding:12px; margin-bottom:8px;
@@ -148,6 +170,7 @@ const auth   = useAuthStore()
 const router = useRouter()
 const currentTime = ref(Date.now())
 const isDarkTheme = ref(localStorage.getItem('theme') !== 'light')
+const sidebarOpen = ref(false)
 let timeInterval = null
 
 // Start activity tracking
@@ -244,6 +267,22 @@ const sessionColor = computed(() => {
   return '#10B981' // Green: 5+ minutes
 })
 
+// Sidebar toggle functions
+function toggleSidebar() {
+  sidebarOpen.value = !sidebarOpen.value
+}
+
+function closeSidebar() {
+  sidebarOpen.value = false
+}
+
+// Close sidebar when route changes on mobile
+router.afterEach(() => {
+  if (window.innerWidth < 768) {
+    closeSidebar()
+  }
+})
+
 async function handleLogout() {
   await auth.logout()
   router.push({ name: 'login' })
@@ -251,6 +290,220 @@ async function handleLogout() {
 </script>
 
 <style scoped>
+/* Mobile menu toggle button */
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1001;
+  width: 44px;
+  height: 44px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-menu-toggle:hover {
+  background: var(--bg-tertiary);
+  transform: scale(1.05);
+}
+
+.mobile-menu-toggle.sidebar-open {
+  background: var(--accent-color);
+  color: #000;
+}
+
+/* Mobile overlay */
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+/* Sidebar responsive behavior */
+.sidebar {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Tablet styles */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 220px;
+    padding: 12px;
+  }
+  
+  .sidebar > div:first-child {
+    padding: 10px;
+    margin-bottom: 6px;
+  }
+  
+  .sidebar > div:first-child div:first-child {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+  
+  .sidebar > div:first-child div:nth-child(2) div:first-child {
+    font-size: 16px;
+  }
+  
+  .sidebar > div:first-child div:nth-child(2) div:last-child {
+    font-size: 11px;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: flex;
+  }
+  
+  .mobile-overlay {
+    display: block;
+  }
+  
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 1001;
+    transform: translateX(-100%);
+    opacity: 0;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  
+  .sidebar > div:first-child {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .sidebar > div:nth-child(2) {
+    gap: 24px;
+    padding-bottom: 24px;
+  }
+  
+  .sidebar > div:last-child {
+    gap: 14px;
+    margin-top: 12px;
+  }
+}
+
+/* Small mobile styles */
+@media (max-width: 480px) {
+  .mobile-menu-toggle {
+    top: 12px;
+    left: 12px;
+    width: 40px;
+    height: 40px;
+  }
+  
+  .sidebar {
+    width: 260px;
+  }
+  
+  .sidebar > div:first-child {
+    padding: 12px;
+    gap: 10px;
+  }
+  
+  .sidebar > div:first-child div:first-child {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+  
+  .sidebar > div:first-child div:nth-child(2) div:first-child {
+    font-size: 14px;
+  }
+  
+  .sidebar > div:first-child div:nth-child(2) div:last-child {
+    font-size: 10px;
+  }
+  
+  .sidebar > div:nth-child(2) {
+    gap: 20px;
+  }
+  
+  .sidebar > div:last-child {
+    gap: 12px;
+    margin-top: 10px;
+  }
+  
+  .sidebar button {
+    height: 36px;
+    font-size: 13px;
+    padding: 0 10px;
+  }
+  
+  .sidebar button span {
+    font-size: 13px;
+  }
+}
+
+/* Very small mobile styles */
+@media (max-width: 360px) {
+  .sidebar {
+    width: 240px;
+  }
+  
+  .sidebar > div:first-child {
+    padding: 10px;
+    gap: 8px;
+  }
+  
+  .sidebar > div:first-child div:first-child {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+  
+  .sidebar > div:first-child div:nth-child(2) div:first-child {
+    font-size: 13px;
+  }
+  
+  .sidebar > div:first-child div:nth-child(2) div:last-child {
+    font-size: 9px;
+  }
+  
+  .sidebar > div:nth-child(2) {
+    gap: 16px;
+  }
+  
+  .sidebar > div:last-child {
+    gap: 10px;
+  }
+  
+  .sidebar button {
+    height: 34px;
+    font-size: 12px;
+    padding: 0 8px;
+  }
+  
+  .sidebar button span {
+    font-size: 12px;
+  }
+}
+
 /* Ensure sidebar has proper height and scrolling on all screen sizes */
 @media (min-height: 600px) {
   aside {
@@ -262,6 +515,42 @@ async function handleLogout() {
   aside {
     min-height: 100vh;
     overflow-y: visible;
+  }
+}
+
+/* Touch-friendly improvements for mobile */
+@media (max-width: 768px) {
+  .sidebar button,
+  .sidebar a {
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  
+  .sidebar button:hover,
+  .sidebar a:hover {
+    transform: scale(1.02);
+  }
+}
+
+/* Landscape mobile adjustments */
+@media (max-width: 768px) and (max-height: 500px) {
+  .sidebar {
+    width: 300px;
+  }
+  
+  .sidebar > div:first-child {
+    padding: 8px;
+    margin-bottom: 8px;
+  }
+  
+  .sidebar > div:nth-child(2) {
+    gap: 16px;
+  }
+  
+  .sidebar > div:last-child {
+    gap: 8px;
+    margin-top: 8px;
   }
 }
 </style>
