@@ -3,6 +3,8 @@
     style="background:#1A1E28; border:1px solid #252B38; border-radius:16px;
            width:420px; max-width:94vw; max-height:92vh; overflow:hidden;
            display:flex; flex-direction:column;
+               position: relative;
+               bottom: 60px;
            box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);"
   >
 
@@ -794,11 +796,27 @@ onUnmounted(() => {
 <style scoped>
 /* ── Mobile Responsive ── */
 @media (max-width: 768px) {
-  .payment-modal {
-    width: 95%;
-    max-width: 95%;
-    margin: 2.5% auto;
-    max-height: 95vh;
+  /* Target the actual modal div with inline styles */
+  div[style*="background:#1A1E28"] {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    margin: 5vh auto !important;
+  }
+  
+  /* Ensure scrollable content area has proper height */
+  div[style*="flex:1; overflow-y:auto"] {
+    max-height: calc(90vh - 200px) !important;
+    padding: 12px 16px !important;
+  }
+  
+  /* Fix footer positioning */
+  div[style*="padding:14px 20px; border-top:1px solid #252B38"] {
+    padding: 12px 16px !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    background: #1A1E28 !important;
+    z-index: 10 !important;
   }
   
   .payment-content {
@@ -927,11 +945,27 @@ onUnmounted(() => {
 }
 
 @media (max-width: 480px) {
-  .payment-modal {
-    width: 98%;
-    max-width: 98%;
-    margin: 1% auto;
-    max-height: 98vh;
+  /* Target the actual modal div with inline styles */
+  div[style*="background:#1A1E28"] {
+    width: 98vw !important;
+    max-width: 98vw !important;
+    max-height: 95vh !important;
+    margin: 2.5vh auto !important;
+  }
+  
+  /* Ensure scrollable content area has proper height */
+  div[style*="flex:1; overflow-y:auto"] {
+    max-height: calc(95vh - 180px) !important;
+    padding: 10px 12px !important;
+  }
+  
+  /* Fix footer positioning */
+  div[style*="padding:14px 20px; border-top:1px solid #252B38"] {
+    padding: 10px 12px !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    background: #1A1E28 !important;
+    z-index: 10 !important;
   }
   
   .payment-content {

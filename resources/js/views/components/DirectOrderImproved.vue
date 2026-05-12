@@ -65,7 +65,7 @@
         :style="{
           borderColor: pendingKotOrders.length > 0 ? '#F59E0B' : 'var(--border-color)',
           background:  pendingKotOrders.length > 0 ? 'rgba(245,158,11,0.1)' : 'var(--bg-tertiary)',
-          color:      pendingKotOrders.length > 0 ? '#F59E0B' : 'var(--text-secondary)',
+          color:       pendingKotOrders.length > 0 ? '#F59E0B' : 'var(--text-secondary)',
         }">
         <span>Orders</span>
         <span v-if="pendingKotOrders.length > 0"
@@ -89,11 +89,10 @@
             borderColor: selectedType === t.value ? t.color : '#252B38',
           }"
         >{{ t.label }}</button>
-        
-        <!-- Start New Order Button -->
+
         <button @click="createNewDirectOrder"
           style="padding:6px 12px; border-radius:6px; font-size:11px; font-weight:600;
-                 border:1px solid var(--border-color); cursor:pointer; min-height:36px;
+                 cursor:pointer; min-height:36px;
                  background:linear-gradient(135deg,#10B981,#059669); color:#fff; border:none;
                  -webkit-tap-highlight-color:transparent; touch-action:manipulation;">
           + New Order
@@ -119,6 +118,14 @@
           borderColor: selectedType === t.value ? t.color : '#252B38',
         }"
       >{{ t.label }}</button>
+
+      <button @click="createNewDirectOrder"
+        style="padding:7px 12px; border-radius:6px; font-size:12px; font-weight:600;
+               white-space:nowrap; flex-shrink:0; cursor:pointer; min-height:36px; border:none;
+               background:linear-gradient(135deg,#10B981,#059669); color:#fff;
+               -webkit-tap-highlight-color:transparent; touch-action:manipulation;">
+        + New Order
+      </button>
     </div>
 
     <!-- ── BODY ── -->
@@ -131,9 +138,8 @@
                overflow:hidden; min-width:0;">
 
         <!-- Category Bar -->
-        <div
-          style="display:flex; gap:6px; padding:8px 12px; border-bottom:1px solid #252B38;
-                 overflow-x:auto; flex-shrink:0; -webkit-overflow-scrolling:touch; scrollbar-width:none;">
+        <div style="display:flex; gap:6px; padding:8px 12px; border-bottom:1px solid #252B38;
+                    overflow-x:auto; flex-shrink:0; -webkit-overflow-scrolling:touch; scrollbar-width:none;">
           <button
             v-for="cat in menuStore.categories" :key="cat.id"
             @click="menuStore.setActiveCategory(cat.id)"
@@ -160,11 +166,9 @@
                 @keydown.enter="onSearchEnter"
                 placeholder="Search menu items..."
                 style="width:100%; background:var(--bg-tertiary); border:1px solid var(--border-color);
-                       border-radius:8px; padding:10px 36px 10px 40px; color:var(--text-primary);
+                       border-radius:8px; padding:10px 36px 10px 12px; color:var(--text-primary);
                        font-size:14px; outline:none; box-sizing:border-box; font-family:inherit;"
-                :style="{
-                  borderColor: searchQuery ? '#F59E0B' : 'var(--border-color)',
-                }"
+                :style="{ borderColor: searchQuery ? '#F59E0B' : 'var(--border-color)' }"
               />
               <div v-if="searchQuery"
                 @click="clearSearch"
@@ -175,9 +179,7 @@
                 ×
               </div>
             </div>
-            <button
-              v-if="searchQuery"
-              @click="clearSearch"
+            <button v-if="searchQuery" @click="clearSearch"
               style="padding:8px 12px; background:var(--bg-tertiary); border:1px solid var(--border-color);
                      border-radius:8px; color:var(--text-secondary); cursor:pointer; font-size:12px;
                      white-space:nowrap; -webkit-tap-highlight-color:transparent; touch-action:manipulation;">
@@ -197,13 +199,12 @@
           </div>
 
           <div v-else class="menu-grid">
-            <!-- Search Results Message -->
             <div v-if="searchQuery && currentItems.length === 0"
-              style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
+              style="grid-column:1/-1; text-align:center; padding:40px 20px; color:var(--text-secondary);">
               <div style="font-size:24px; opacity:0.2; margin-bottom:12px;">🔍</div>
               <div style="font-size:14px; margin-bottom:4px;">No items found</div>
-              <div style="font-size:12px; color:var(--text-muted);">
-                Try different keywords or clear search to see all items
+              <div style="font-size:12px; color:var(--text-secondary);">
+                Try different keywords or clear search
               </div>
             </div>
 
@@ -214,7 +215,6 @@
               class="menu-item-card"
               :style="{ opacity: item.is_available ? '1' : '0.4' }"
             >
-              <!-- Badges -->
               <div style="position:absolute; top:4px; right:4px; display:flex; flex-direction:column; gap:2px; z-index:1;">
                 <span v-if="item.is_instant"
                   style="font-size:8px; font-weight:700; background:rgba(16,185,129,0.9);
@@ -228,7 +228,6 @@
                              color:#fff; padding:1px 4px; border-radius:3px; line-height:1.4;">⚙</span>
               </div>
 
-              <!-- Image -->
               <div class="item-img-wrap">
                 <img
                   v-if="item.image"
@@ -245,7 +244,6 @@
                 </div>
               </div>
 
-              <!-- Info -->
               <div style="padding:5px 2px 0;">
                 <div style="font-size:12px; font-weight:600; color:var(--text-primary);
                             line-height:1.3; text-align:left; white-space:nowrap;
@@ -332,8 +330,7 @@
               </div>
               <div v-else
                 style="position:absolute; top:10px; right:10px; width:6px; height:6px;
-                       border-radius:50%; background:#10B981;
-                       box-shadow:0 0 0 2px rgba(16,185,129,0.2);">
+                       border-radius:50%; background:#10B981; box-shadow:0 0 0 2px rgba(16,185,129,0.2);">
               </div>
 
               <div style="font-size:12px; font-weight:700; color:var(--text-primary);
@@ -382,14 +379,18 @@
         style="width:300px; display:flex; flex-direction:column; background:#12151C; flex-shrink:0;">
 
         <!-- Customer Name -->
-        <div style="padding:5px 12px; border-bottom:1px solid #252B38; flex-shrink:0;">
-          <div style="font-size:10px; color:var(--text-secondary); margin-bottom:5px; font-weight:600;
-                      text-transform:uppercase; letter-spacing:0.06em;">Customer</div>
+        <div class="cart-customer"
+          style="padding:5px 12px; border-bottom:1px solid #252B38; flex-shrink:0;">
+          <div class="section-label"
+            style="font-size:10px; color:var(--text-secondary); margin-bottom:5px;
+                   font-weight:600; text-transform:uppercase; letter-spacing:0.06em;">
+            Customer
+          </div>
           <input
             v-model="customerName"
             placeholder="Walk-in / Name (optional)"
             style="width:100%; background:var(--bg-tertiary); border:1px solid var(--border-color);
-                   border-radius:7px; padding:10px 11px; color:var(--text-primary); font-size:16px;
+                   border-radius:7px; padding:8px 11px; color:var(--text-primary); font-size:16px;
                    outline:none; font-family:inherit; box-sizing:border-box;"
             @focus="e => e.target.style.borderColor='#F59E0B'"
             @blur="e => { e.target.style.borderColor='#252B38'; updateCustomerName() }"
@@ -397,28 +398,34 @@
         </div>
 
         <!-- Cart Header -->
-        <div style="padding:10px 12px; border-bottom:1px solid #252B38; flex-shrink:0;">
+        <div class="cart-header"
+          style="padding:8px 12px; border-bottom:1px solid #252B38; flex-shrink:0;">
           <div style="display:flex; align-items:center; justify-content:space-between;">
             <div>
-              <div style="font-weight:700; font-size:14px; color:var(--text-primary);">Order Cart</div>
-              <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+              <div class="cart-title"
+                style="font-weight:700; font-size:14px; color:var(--text-primary);">
+                Order Cart
+              </div>
+              <div class="cart-meta"
+                style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
                 {{ totalItemCount }} item(s) ·
                 <span style="color:#F59E0B;">Round {{ currentRound }}</span>
               </div>
             </div>
-            <button @click="refreshOrder"
+            <button @click="refreshOrder" class="refresh-btn"
               style="background:var(--bg-tertiary); border:1px solid var(--border-color);
-                     border-radius:6px; padding:6px 8px; color:var(--text-secondary);
-                     font-size:11px; cursor:pointer; min-height:36px;
+                     border-radius:6px; padding:5px 8px; color:var(--text-secondary);
+                     font-size:11px; cursor:pointer; min-height:32px;
                      -webkit-tap-highlight-color:transparent;">
               🔄
             </button>
           </div>
         </div>
 
-        <!-- Cart Items -->
-        <div style="flex:1; overflow-y:auto; padding:10px; padding-bottom:16px;
-                    display:flex; flex-direction:column; gap:0; -webkit-overflow-scrolling:touch;">
+        <!-- Cart Items — only this region scrolls -->
+        <div class="cart-items"
+          style="flex:1; overflow-y:auto; padding:8px;
+                 display:flex; flex-direction:column; gap:0; -webkit-overflow-scrolling:touch;">
 
           <div v-if="orderItems.length === 0"
             style="display:flex; flex-direction:column; align-items:center;
@@ -429,82 +436,95 @@
           </div>
 
           <template v-else>
-            <!-- Unsent Items (moved to top for easier access) -->
+
+            <!-- Unsent Items -->
             <div v-if="unsentItems.length > 0">
-              <div style="display:flex; align-items:center; gap:8px; margin-bottom:7px;">
-                <div style="font-size:10px; font-weight:700; text-transform:uppercase;
-                            letter-spacing:0.07em; color:#F59E0B; white-space:nowrap;">
+              <div class="round-header"
+                style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <div class="round-label"
+                  style="font-size:10px; font-weight:700; text-transform:uppercase;
+                         letter-spacing:0.07em; color:#F59E0B; white-space:nowrap;">
                   ✦ New Items
                 </div>
                 <div style="flex:1; height:1px; background:rgba(245,158,11,0.3);"></div>
-                <div style="font-size:10px; color:#F59E0B; white-space:nowrap;">Not sent yet</div>
+                <div class="round-time"
+                  style="font-size:10px; color:#F59E0B; white-space:nowrap;">
+                  Not sent yet
+                </div>
               </div>
 
               <div v-for="item in unsentItems" :key="item.id"
-                style="border-radius:8px; padding:10px 11px; margin-bottom:4px;
+                class="cart-item-card"
+                style="border-radius:8px; padding:9px 10px; margin-bottom:4px;
                        background:var(--bg-tertiary); border:1.5px solid rgba(245,158,11,0.25);
                        border-left:3px solid #F59E0B;">
                 <div style="display:flex; align-items:start; justify-content:space-between; gap:8px;">
                   <div style="flex:1; min-width:0;">
-                    <div style="font-size:12px; font-weight:600; color:var(--text-primary);">
+                    <div class="item-name"
+                      style="font-size:12px; font-weight:600; color:var(--text-primary);">
                       {{ item.item_name }}
                     </div>
-                    <div v-if="item.notes"
+                    <div v-if="item.notes" class="item-note"
                       style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
                       📝 {{ item.notes }}
                     </div>
                   </div>
-                  <div style="font-size:13px; font-weight:700; color:#F59E0B; flex-shrink:0;">
+                  <div class="item-price"
+                    style="font-size:13px; font-weight:700; color:#F59E0B; flex-shrink:0;">
                     Rs.{{ parseFloat(item.total_price).toFixed(2) }}
                   </div>
                 </div>
-                <div style="display:flex; align-items:center; gap:6px; margin-top:9px;">
-                  <button @click="decreaseQty(item)"
-                    style="width:34px; height:34px; border-radius:6px; border:1px solid var(--border-color);
+
+                <div style="display:flex; align-items:center; gap:5px; margin-top:8px; flex-wrap:nowrap;">
+                  <button @click="decreaseQty(item)" class="qty-btn"
+                    style="width:32px; height:32px; border-radius:6px; border:1px solid var(--border-color);
                            background:var(--bg-tertiary); color:var(--text-primary); font-size:18px;
                            cursor:pointer; display:flex; align-items:center; justify-content:center;
                            flex-shrink:0; -webkit-tap-highlight-color:transparent; touch-action:manipulation;">
                     −
                   </button>
-                  <span style="font-size:13px; font-weight:700; min-width:24px;
-                               text-align:center; color:var(--text-primary);">
+                  <span class="qty-display"
+                    style="font-size:13px; font-weight:700; min-width:22px;
+                           text-align:center; color:var(--text-primary);">
                     {{ item.quantity }}
                   </span>
-                  <button @click="increaseQty(item)"
-                    style="width:34px; height:34px; border-radius:6px; border:1px solid var(--border-color);
+                  <button @click="increaseQty(item)" class="qty-btn"
+                    style="width:32px; height:32px; border-radius:6px; border:1px solid var(--border-color);
                            background:var(--bg-tertiary); color:var(--text-primary); font-size:18px;
                            cursor:pointer; display:flex; align-items:center; justify-content:center;
                            flex-shrink:0; -webkit-tap-highlight-color:transparent; touch-action:manipulation;">
                     +
                   </button>
-                  <button @click="openNotes(item)"
-                    style="padding:6px 10px; border-radius:5px; border:1px solid var(--border-color);
+                  <button @click="openNotes(item)" class="item-action-btn"
+                    style="padding:5px 8px; border-radius:5px; border:1px solid var(--border-color);
                            background:transparent; color:var(--text-secondary); font-size:11px;
-                           cursor:pointer; min-height:34px; -webkit-tap-highlight-color:transparent;
-                           touch-action:manipulation;">
+                           cursor:pointer; min-height:30px; -webkit-tap-highlight-color:transparent;
+                           touch-action:manipulation; white-space:nowrap;">
                     📝 Note
                   </button>
-                  <button @click="openAddons(item)"
-                    style="padding:6px 10px; border-radius:5px; border:1px solid var(--accent-color);
+                  <button @click="openAddons(item)" class="item-action-btn"
+                    style="padding:5px 8px; border-radius:5px; border:1px solid var(--accent-color);
                            background:rgba(245,158,11,0.1); color:var(--accent-color); font-size:11px;
-                           font-weight:600; cursor:pointer; min-height:34px; -webkit-tap-highlight-color:transparent;
-                           touch-action:manipulation;">
+                           font-weight:600; cursor:pointer; min-height:30px;
+                           -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+                           white-space:nowrap;">
                     +Extra
                   </button>
                   <button @click="voidOrderItem(item)"
                     style="margin-left:auto; background:none; border:none; color:#EF4444;
-                           font-size:13px; cursor:pointer; padding:6px 8px; min-height:34px;
-                           min-width:34px; -webkit-tap-highlight-color:transparent; touch-action:manipulation;">
+                           font-size:13px; cursor:pointer; padding:5px 6px; min-height:30px;
+                           min-width:30px; flex-shrink:0; -webkit-tap-highlight-color:transparent;
+                           touch-action:manipulation;">
                     ✕
                   </button>
                 </div>
               </div>
 
-              <button @click="sendKOT"
-                style="width:100%; margin-top:6px; padding:13px; border-radius:9px;
+              <button @click="sendKOT" class="send-kot-inline"
+                style="width:100%; margin-top:5px; padding:11px; border-radius:8px;
                        background:rgba(59,130,246,0.12); color:#3B82F6;
                        border:1px solid rgba(59,130,246,0.35); font-size:13px; font-weight:700;
-                       cursor:pointer; min-height:48px; display:flex; align-items:center;
+                       cursor:pointer; min-height:44px; display:flex; align-items:center;
                        justify-content:center; gap:6px; -webkit-tap-highlight-color:transparent;
                        touch-action:manipulation;">
                 📋 Send {{ unsentItems.length }} item(s) to Kitchen
@@ -512,42 +532,51 @@
             </div>
 
             <!-- Sent Rounds -->
-            <div v-for="round in sentRounds" :key="'r' + round.number" style="margin-bottom:12px;">
-              <div style="display:flex; align-items:center; gap:8px; margin-bottom:7px;">
-                <div style="font-size:10px; font-weight:700; text-transform:uppercase;
-                            letter-spacing:0.07em; color:var(--text-secondary); white-space:nowrap;">
+            <div v-for="round in sentRounds" :key="'r' + round.number"
+              style="margin-bottom:10px; margin-top:6px;">
+              <div class="round-header"
+                style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <div class="round-label"
+                  style="font-size:10px; font-weight:700; text-transform:uppercase;
+                         letter-spacing:0.07em; color:var(--text-secondary); white-space:nowrap;">
                   Round {{ round.number }}
                 </div>
                 <div style="flex:1; height:1px; background:var(--border-color);"></div>
-                <div style="font-size:10px; color:var(--text-secondary); white-space:nowrap; font-family:monospace;">
+                <div class="round-time"
+                  style="font-size:10px; color:var(--text-secondary); white-space:nowrap; font-family:monospace;">
                   {{ round.sentTime }}
                 </div>
               </div>
 
               <div v-for="item in round.items" :key="item.id"
-                style="border-radius:8px; padding:9px 11px; margin-bottom:4px;
+                class="sent-item-row"
+                style="border-radius:8px; padding:8px 10px; margin-bottom:3px;
                        background:var(--bg-tertiary); border:1px solid var(--border-color);
                        border-left-width:3px;"
                 :style="{ borderLeftColor: statusColor(item.status) }">
                 <div style="display:flex; align-items:center; gap:8px;">
-                  <div style="width:8px; height:8px; border-radius:50%; flex-shrink:0;"
+                  <div style="width:7px; height:7px; border-radius:50%; flex-shrink:0;"
                     :style="{ background: statusColor(item.status) }"></div>
-                  <div style="flex:1; font-size:12px; font-weight:500; color:var(--text-primary);
-                              white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  <div class="sent-name"
+                    style="flex:1; font-size:12px; font-weight:500; color:var(--text-primary);
+                           white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                     {{ item.item_name }}
                   </div>
-                  <div style="font-size:11px; font-weight:700; padding:1px 6px; border-radius:4px;"
+                  <div class="sent-badge"
+                    style="font-size:11px; font-weight:700; padding:1px 6px; border-radius:4px; flex-shrink:0;"
                     :style="{ background: statusBg(item.status), color: statusColor(item.status) }">
                     ×{{ item.quantity }}
                   </div>
-                  <div style="font-size:11px; color:var(--text-secondary); min-width:44px; text-align:right;">
+                  <div class="sent-price"
+                    style="font-size:11px; color:var(--text-secondary); min-width:44px; text-align:right;">
                     Rs.{{ parseFloat(item.total_price).toFixed(2) }}
                   </div>
                 </div>
+
                 <div v-if="item.selected_modifiers?.length > 0"
-                  style="display:flex; flex-wrap:wrap; gap:3px; margin-top:5px; padding-left:16px;">
+                  style="display:flex; flex-wrap:wrap; gap:3px; margin-top:4px; padding-left:15px;">
                   <span v-for="mod in item.selected_modifiers" :key="mod.id"
-                    style="font-size:9px; padding:1px 6px; border-radius:4px;
+                    style="font-size:9px; padding:1px 5px; border-radius:4px;
                            background:rgba(100,116,139,0.12); color:var(--text-secondary);">
                     {{ mod.name }}
                     <span v-if="mod.pivot?.price_adjustment > 0" style="color:#F59E0B;">
@@ -555,20 +584,24 @@
                     </span>
                   </span>
                 </div>
+
                 <div v-if="item.notes"
-                  style="font-size:10px; color:var(--text-secondary); margin-top:3px; padding-left:16px;">
+                  style="font-size:10px; color:var(--text-secondary); margin-top:3px; padding-left:15px;">
                   📝 {{ item.notes }}
                 </div>
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-top:6px;">
-                  <span style="font-size:9px; font-weight:700; text-transform:uppercase;
-                               padding:1px 6px; border-radius:4px;"
+
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-top:5px;">
+                  <span class="status-pill"
+                    style="font-size:9px; font-weight:700; text-transform:uppercase;
+                           padding:1px 6px; border-radius:4px;"
                     :style="{ background: statusBg(item.status), color: statusColor(item.status) }">
                     {{ statusLabel(item.status) }}
                   </span>
                   <button v-if="item.status === 'preparing' || item.status === 'ready'"
                     @click="advanceStatus(item)"
-                    style="font-size:10px; padding:4px 10px; border-radius:4px; border:none;
-                           cursor:pointer; font-weight:600; min-height:30px;
+                    class="advance-btn"
+                    style="font-size:10px; padding:3px 9px; border-radius:4px; border:none;
+                           cursor:pointer; font-weight:600; min-height:26px;
                            -webkit-tap-highlight-color:transparent; touch-action:manipulation;"
                     :style="{
                       background: item.status === 'preparing' ? 'rgba(16,185,129,0.15)' : 'rgba(100,116,139,0.15)',
@@ -579,36 +612,44 @@
                 </div>
               </div>
             </div>
+
           </template>
         </div>
 
-        <!-- Totals -->
-        <div style="padding:10px 14px 12px; border-top:1px solid #252B38; flex-shrink:0;">
-          <div style="display:flex; justify-content:space-between; font-size:12px;
-                      color:var(--text-secondary); margin-bottom:3px;">
+        <!-- Totals — fixed, never scrolls -->
+        <div class="cart-totals"
+          style="padding:8px 14px; border-top:1px solid #252B38; flex-shrink:0;">
+          <div class="totals-row"
+            style="display:flex; justify-content:space-between; font-size:12px;
+                   color:var(--text-secondary); margin-bottom:3px;">
             <span>Subtotal</span>
             <span>Rs.{{ parseFloat(currentOrder?.subtotal ?? 0).toFixed(2) }}</span>
           </div>
           <div v-if="currentOrder?.tax_rate > 0"
+            class="totals-row"
             style="display:flex; justify-content:space-between; font-size:12px;
                    color:var(--text-secondary); margin-bottom:3px;">
             <span>Tax ({{ currentOrder?.tax_rate ?? 0 }}%)</span>
             <span>Rs.{{ parseFloat(currentOrder?.tax_amount ?? 0).toFixed(2) }}</span>
           </div>
-          <div style="display:flex; justify-content:space-between; font-weight:700; font-size:15px;
-                      border-top:1px solid #252B38; padding-top:8px; margin-top:6px;">
+          <div class="totals-total"
+            style="display:flex; justify-content:space-between; font-weight:700; font-size:15px;
+                   border-top:1px solid #252B38; padding-top:7px; margin-top:5px;">
             <span style="color:var(--text-primary);">Total</span>
             <span style="color:#F59E0B;">Rs.{{ parseFloat(currentOrder?.total ?? 0).toFixed(2) }}</span>
           </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div style="padding:10px 12px; border-top:1px solid #252B38; flex-shrink:0;
-                    display:flex; flex-direction:column; gap:8px;
-                    padding-bottom:max(20px, env(safe-area-inset-bottom, 20px));">
+        <!-- Action Buttons — always pinned at bottom -->
+        <div class="cart-footer"
+          style="padding:8px 12px; border-top:1px solid #252B38; flex-shrink:0;
+                 display:flex; flex-direction:column; gap:6px;
+                 padding-bottom:max(16px, env(safe-area-inset-bottom, 16px));
+                 background:#12151C;">
 
           <div v-if="unsentItems.length > 0 && sentItems.length > 0"
-            style="font-size:11px; color:#F59E0B; text-align:center; padding:5px 10px;
+            class="unsent-warn"
+            style="font-size:11px; color:#F59E0B; text-align:center; padding:4px 8px;
                    background:rgba(245,158,11,0.08); border-radius:6px;
                    border:1px solid rgba(245,158,11,0.2);">
             ⚠️ {{ unsentItems.length }} item(s) not sent to kitchen
@@ -616,9 +657,10 @@
 
           <button v-if="unsentItems.length > 0"
             @click="sendKOT"
-            style="width:100%; padding:13px; background:linear-gradient(135deg,#F59E0B,#D97706);
-                   color:#000; border:none; border-radius:9px; font-size:14px; font-weight:700;
-                   cursor:pointer; min-height:50px; display:flex; align-items:center;
+            class="btn-send-kot"
+            style="width:100%; padding:11px; background:linear-gradient(135deg,#F59E0B,#D97706);
+                   color:#000; border:none; border-radius:8px; font-size:14px; font-weight:700;
+                   cursor:pointer; min-height:44px; display:flex; align-items:center;
                    justify-content:center; gap:6px; -webkit-tap-highlight-color:transparent;
                    touch-action:manipulation;">
             🍳 Send KOT ({{ unsentItems.length }} items)
@@ -626,28 +668,32 @@
 
           <button
             @click="orderItems.length > 0 ? openDirectPayment() : null"
-            style="width:100%; padding:14px; background:linear-gradient(135deg,#10B981,#059669);
-                   color:#fff; border:none; border-radius:9px; font-size:14px; font-weight:700;
-                   cursor:pointer; min-height:52px; display:flex; align-items:center;
+            class="btn-charge"
+            style="width:100%; padding:12px; background:linear-gradient(135deg,#10B981,#059669);
+                   color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:700;
+                   cursor:pointer; min-height:46px; display:flex; align-items:center;
                    justify-content:center; gap:6px; -webkit-tap-highlight-color:transparent;
                    touch-action:manipulation; transition:opacity 0.2s;"
-            :style="{ opacity: orderItems.length > 0 ? '1' : '0.45',
-                      cursor:  orderItems.length > 0 ? 'pointer' : 'not-allowed' }">
+            :style="{
+              opacity: orderItems.length > 0 ? '1' : '0.45',
+              cursor:  orderItems.length > 0 ? 'pointer' : 'not-allowed'
+            }">
             💳 Charge Rs.{{ parseFloat(currentOrder?.total ?? 0).toFixed(2) }}
           </button>
 
           <button v-if="!hasKotItems()"
             @click="deleteCurrentOrder"
-            style="width:100%; padding:10px; background:transparent; color:#EF4444;
-                   border:1px solid rgba(239,68,68,0.25); border-radius:8px; font-size:12px;
-                   font-weight:600; cursor:pointer; min-height:42px;
+            class="btn-delete"
+            style="width:100%; padding:8px; background:transparent; color:#EF4444;
+                   border:1px solid rgba(239,68,68,0.25); border-radius:7px; font-size:12px;
+                   font-weight:600; cursor:pointer; min-height:36px;
                    -webkit-tap-highlight-color:transparent; touch-action:manipulation;">
             🗑️ Delete Order
           </button>
         </div>
       </div>
 
-      <!-- No-order placeholder (cart area) -->
+      <!-- No-order placeholder -->
       <div v-else class="panel cart-panel"
         :class="{ 'panel-active': mobileView === 'cart' }"
         style="width:300px; background:#12151C; flex-shrink:0; display:flex;
@@ -660,7 +706,7 @@
 
     </div><!-- end body -->
 
-    <!-- ══ DIRECT ORDER PAYMENT MODAL ══ -->
+    <!-- ══ PAYMENT MODAL ══ -->
     <Teleport to="body">
       <div v-if="directPayment.show"
         style="position:fixed; inset:0; background:rgba(0,0,0,0.65);
@@ -671,12 +717,11 @@
                     overflow:hidden; display:flex; flex-direction:column;
                     box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
 
-          <!-- Payment Form -->
           <template v-if="!directPayment.paid">
 
-            <div style="padding:16px 20px; border-bottom:1px solid #252B38;
+            <div style="padding:14px 18px; border-bottom:1px solid #252B38;
                         display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
-              <div style="font-size:17px; font-weight:700; color:var(--text-primary);">💳 Payment</div>
+              <div style="font-size:16px; font-weight:700; color:var(--text-primary);">💳 Payment</div>
               <button @click="directPayment.show = false"
                 style="width:30px; height:30px; background:transparent; border:none;
                        color:var(--text-secondary); cursor:pointer; border-radius:6px;
@@ -685,10 +730,9 @@
               </button>
             </div>
 
-            <div style="flex:1; overflow-y:auto; padding:16px 20px;">
+            <div style="flex:1; overflow-y:auto; padding:14px 18px;">
 
-              <!-- Order info -->
-              <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
+              <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
                 <div style="background:#12151C; border:1px solid var(--border-color); border-radius:8px;
                             padding:8px 12px; flex:1; min-width:80px;">
                   <div style="font-size:10px; color:var(--text-secondary); margin-bottom:2px;">Order</div>
@@ -707,9 +751,8 @@
                 </div>
               </div>
 
-              <!-- Items list (collapsible) -->
               <div style="background:#12151C; border:1px solid var(--border-color); border-radius:10px;
-                          margin-bottom:14px; overflow:hidden;">
+                          margin-bottom:12px; overflow:hidden;">
                 <div @click="directPayment.showItems = !directPayment.showItems"
                   style="padding:10px 14px; display:flex; align-items:center;
                          justify-content:space-between; cursor:pointer; user-select:none;">
@@ -730,25 +773,20 @@
                         </div>
                       </div>
                       <div style="font-size:12px; color:#94A3B8; margin-left:8px; flex-shrink:0;">
-                        Rs.{{
-                          (parseFloat(item.total_price || 0) + 
-                          (item.addons ? item.addons.reduce((sum, addon) => sum + parseFloat(addon.total_price || 0), 0) : 0)
-                          ).toFixed(2)
-                        }}
+                        Rs.{{ (parseFloat(item.total_price || 0) +
+                          (item.addons ? item.addons.reduce((s, a) => s + parseFloat(a.total_price || 0), 0) : 0)
+                        ).toFixed(2) }}
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Totals summary -->
               <div style="background:#12151C; border:1px solid var(--border-color); border-radius:10px;
-                          padding:14px; margin-bottom:14px;">
+                          padding:12px 14px; margin-bottom:12px;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
                   <span style="font-size:12px; color:var(--text-secondary);">Subtotal</span>
-                  <span style="font-size:12px; color:#94A3B8;">
-                    Rs.{{ directPayment.snapshotSubtotal.toFixed(2) }}
-                  </span>
+                  <span style="font-size:12px; color:#94A3B8;">Rs.{{ directPayment.snapshotSubtotal.toFixed(2) }}</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                   <span style="font-size:12px; color:var(--text-secondary);">Service Charge</span>
@@ -756,15 +794,14 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; padding-top:8px;
                             border-top:1px solid #252B38; margin-top:4px;">
-                  <span style="font-size:15px; font-weight:700; color:var(--text-primary);">Total</span>
-                  <span style="font-size:20px; font-weight:700; color:#F59E0B;">
+                  <span style="font-size:14px; font-weight:700; color:var(--text-primary);">Total</span>
+                  <span style="font-size:18px; font-weight:700; color:#F59E0B;">
                     Rs.{{ directPayment.snapshotTotal.toFixed(2) }}
                   </span>
                 </div>
               </div>
 
-              <!-- Payment Method -->
-              <div style="margin-bottom:14px;">
+              <div style="margin-bottom:12px;">
                 <div style="font-size:11px; color:var(--text-secondary); text-transform:uppercase;
                             letter-spacing:0.06em; margin-bottom:8px; font-weight:600;">
                   Payment Method
@@ -773,12 +810,11 @@
                   <button
                     v-for="m in directPaymentMethods" :key="m.value"
                     @click="directPayment.selectedMethod = m.value"
-                    style="border-radius:10px; padding:12px 6px; text-align:center;
+                    style="border-radius:10px; padding:10px 6px; text-align:center;
                            cursor:pointer; transition:all 0.15s; border:2px solid;"
                     :style="{
                       borderColor: directPayment.selectedMethod === m.value ? '#F59E0B' : '#252B38',
-                      background:  directPayment.selectedMethod === m.value
-                                   ? 'rgba(245,158,11,0.1)' : '#12151C',
+                      background:  directPayment.selectedMethod === m.value ? 'rgba(245,158,11,0.1)' : '#12151C',
                     }">
                     <div style="font-size:22px; margin-bottom:4px;">{{ m.icon }}</div>
                     <div style="font-size:11px; font-weight:600;"
@@ -789,8 +825,7 @@
                 </div>
               </div>
 
-              <!-- Cash tendered -->
-              <div v-if="directPayment.selectedMethod === 'cash'" style="margin-bottom:14px;">
+              <div v-if="directPayment.selectedMethod === 'cash'" style="margin-bottom:12px;">
                 <div style="font-size:11px; color:var(--text-secondary); text-transform:uppercase;
                             letter-spacing:0.06em; margin-bottom:8px; font-weight:600;">
                   Cash Tendered
@@ -810,8 +845,7 @@
                 </div>
                 <input
                   v-model="directPayment.tendered"
-                  type="number"
-                  step="0.01"
+                  type="number" step="0.01"
                   :placeholder="directPayment.snapshotTotal.toFixed(2)"
                   style="width:100%; background:#12151C; border:1px solid var(--border-color);
                          border-radius:8px; padding:10px 12px; color:var(--text-primary);
@@ -832,8 +866,7 @@
                 </div>
               </div>
 
-              <!-- Card reference -->
-              <div v-if="directPayment.selectedMethod === 'card'" style="margin-bottom:14px;">
+              <div v-if="directPayment.selectedMethod === 'card'" style="margin-bottom:12px;">
                 <div style="font-size:11px; color:var(--text-secondary); text-transform:uppercase;
                             letter-spacing:0.06em; margin-bottom:6px; font-weight:600;">
                   Card Reference (optional)
@@ -849,7 +882,6 @@
                 />
               </div>
 
-              <!-- Error -->
               <div v-if="directPayment.errorMsg"
                 style="padding:10px 14px; background:rgba(239,68,68,0.08);
                        border:1px solid rgba(239,68,68,0.2); border-radius:8px;
@@ -858,18 +890,17 @@
               </div>
             </div>
 
-            <!-- Footer -->
-            <div style="padding:14px 20px; border-top:1px solid #252B38;
+            <div style="padding:12px 18px; border-top:1px solid #252B38;
                         display:flex; gap:8px; flex-shrink:0;">
               <button @click="directPayment.show = false"
-                style="flex:1; padding:12px; border-radius:8px; font-size:13px; font-weight:600;
+                style="flex:1; padding:11px; border-radius:8px; font-size:13px; font-weight:600;
                        background:transparent; color:var(--text-secondary);
                        border:1px solid var(--border-color); cursor:pointer;">
                 Cancel
               </button>
               <button @click="processDirectPayment"
                 :disabled="directPayment.processing"
-                style="flex:2; padding:12px; border-radius:8px; font-size:14px; font-weight:700;
+                style="flex:2; padding:11px; border-radius:8px; font-size:14px; font-weight:700;
                        background:#10B981; color:#fff; border:none; cursor:pointer; transition:opacity 0.15s;"
                 :style="{ opacity: directPayment.processing ? '0.6' : '1' }">
                 {{ directPayment.processing
@@ -881,7 +912,7 @@
 
           <!-- Receipt View -->
           <template v-else>
-            <div style="padding:16px 20px; border-bottom:1px solid #252B38;
+            <div style="padding:14px 18px; border-bottom:1px solid #252B38;
                         display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
               <div style="font-size:15px; font-weight:700; color:#10B981;">✅ Payment Complete</div>
               <div style="display:flex; gap:8px;">
@@ -901,10 +932,9 @@
             </div>
 
             <div style="flex:1; overflow-y:auto; padding:0;">
-              <div style="padding:20px; font-family:monospace;">
-
-                <div style="text-align:center; margin-bottom:16px;">
-                  <div style="font-size:16px; font-weight:700; color:var(--text-primary);">
+              <div style="padding:18px; font-family:monospace;">
+                <div style="text-align:center; margin-bottom:14px;">
+                  <div style="font-size:15px; font-weight:700; color:var(--text-primary);">
                     {{ directPayment.receiptData?.receipt?.restaurant_name ?? 'Restaurant POS' }}
                   </div>
                   <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
@@ -913,7 +943,7 @@
                 </div>
 
                 <div style="border-top:1px dashed #252B38; border-bottom:1px dashed #252B38;
-                            padding:10px 0; margin-bottom:12px;">
+                            padding:8px 0; margin-bottom:10px;">
                   <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
                     <span style="font-size:11px; color:var(--text-secondary);">Order</span>
                     <span style="font-size:11px; color:var(--text-primary);">
@@ -935,8 +965,9 @@
                   </div>
                 </div>
 
-                <div style="margin-bottom:12px;">
-                  <div v-for="item in directPayment.receiptData?.items" :key="item.id" style="margin-bottom:8px;">
+                <div style="margin-bottom:10px;">
+                  <div v-for="item in directPayment.receiptData?.items" :key="item.id"
+                    style="margin-bottom:7px;">
                     <div style="display:flex; justify-content:space-between; align-items:start;">
                       <div style="flex:1;">
                         <span style="font-size:12px; color:var(--text-primary);">
@@ -958,7 +989,7 @@
                   </div>
                 </div>
 
-                <div style="border-top:1px dashed #252B38; padding-top:10px; margin-bottom:12px;">
+                <div style="border-top:1px dashed #252B38; padding-top:8px; margin-bottom:10px;">
                   <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
                     <span style="font-size:12px; color:var(--text-secondary);">Subtotal</span>
                     <span style="font-size:12px; color:#94A3B8;">
@@ -975,22 +1006,23 @@
                          : 'Rs.' + directPayment.receiptData?.totals?.tax_amount }}
                     </span>
                   </div>
-                  <div style="display:flex; justify-content:space-between; padding-top:8px;
+                  <div style="display:flex; justify-content:space-between; padding-top:7px;
                               border-top:1px dashed #252B38; margin-top:4px;">
-                    <span style="font-size:15px; font-weight:700; color:var(--text-primary);">TOTAL</span>
-                    <span style="font-size:15px; font-weight:700; color:#F59E0B;">
+                    <span style="font-size:14px; font-weight:700; color:var(--text-primary);">TOTAL</span>
+                    <span style="font-size:14px; font-weight:700; color:#F59E0B;">
                       Rs.{{ directPayment.receiptData?.totals?.total }}
                     </span>
                   </div>
                 </div>
 
                 <div style="background:#12151C; border:1px solid var(--border-color); border-radius:8px;
-                            padding:12px; margin-bottom:12px;">
+                            padding:10px 12px; margin-bottom:10px;">
                   <div style="font-size:11px; color:var(--text-secondary); text-transform:uppercase;
                               letter-spacing:0.05em; margin-bottom:8px; font-weight:600;">
                     Payment Details
                   </div>
-                  <div v-for="p in directPayment.receiptData?.payments" :key="p.id" style="margin-bottom:6px;">
+                  <div v-for="p in directPayment.receiptData?.payments" :key="p.id"
+                    style="margin-bottom:6px;">
                     <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
                       <span style="font-size:12px; color:var(--text-primary); font-weight:600;">
                         {{ p.method_label }}
@@ -1017,7 +1049,7 @@
                   </div>
                 </div>
 
-                <div style="text-align:center; padding:10px 0;">
+                <div style="text-align:center; padding:8px 0;">
                   <div style="font-size:10px; color:#334155;">Receipt No.</div>
                   <div style="font-size:13px; font-weight:700; color:var(--text-secondary); letter-spacing:0.1em;">
                     {{ directPayment.receiptData?.payments?.[0]?.receipt_number }}
@@ -1030,9 +1062,9 @@
               </div>
             </div>
 
-            <div style="padding:14px 20px; border-top:1px solid #252B38; flex-shrink:0;">
+            <div style="padding:12px 18px; border-top:1px solid #252B38; flex-shrink:0;">
               <button @click="finishDirectOrder"
-                style="width:100%; padding:13px; border-radius:9px; font-size:14px; font-weight:700;
+                style="width:100%; padding:12px; border-radius:9px; font-size:14px; font-weight:700;
                        background:#F59E0B; color:#000; border:none; cursor:pointer;">
                 Done — New Order
               </button>
@@ -1123,9 +1155,9 @@
                     overflow:hidden; display:flex; flex-direction:column;
                     box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
 
-          <div style="padding:16px 20px; border-bottom:1px solid #252B38;
+          <div style="padding:14px 18px; border-bottom:1px solid #252B38;
                       display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
-            <div style="font-size:17px; font-weight:700; color:var(--text-primary);">
+            <div style="font-size:16px; font-weight:700; color:var(--text-primary);">
               Pending Orders
               <span style="font-size:12px; color:var(--text-secondary); margin-left:8px;">
                 ({{ pendingKotOrders.length }} active)
@@ -1139,28 +1171,26 @@
             </button>
           </div>
 
-          <div style="flex:1; overflow-y:auto; padding:16px;">
+          <div style="flex:1; overflow-y:auto; padding:14px;">
             <div v-if="loadingPending"
               style="display:flex; align-items:center; justify-content:center;
-                     height:120px; color:#475569; font-size:13px; gap:8px;">
+                     height:120px; color:#475569; font-size:13px;">
               <span style="opacity:0.5;">Loading pending orders...</span>
             </div>
 
             <div v-else-if="pendingKotOrders.length === 0"
               style="display:flex; flex-direction:column; align-items:center; justify-content:center;
                      height:120px; color:#334155; gap:12px; text-align:center;">
-              <span style="font-size:40px; opacity:0.2;"></span>
               <span style="font-size:14px; color:var(--text-secondary);">No pending orders</span>
               <span style="font-size:12px; color:#475569;">All orders are completed or paid</span>
             </div>
 
-            <div v-else style="display:flex; flex-direction:column; gap:12px;">
+            <div v-else style="display:flex; flex-direction:column; gap:10px;">
               <div
-                v-for="order in pendingKotOrders"
-                :key="order.id"
+                v-for="order in pendingKotOrders" :key="order.id"
                 @click="switchToOrderAndClose(order)"
                 style="background:var(--bg-secondary); border:1px solid var(--border-color);
-                       border-radius:12px; padding:14px; cursor:pointer; position:relative;
+                       border-radius:12px; padding:12px 14px; cursor:pointer; position:relative;
                        border-left:4px solid transparent; transition:all 0.15s;"
                 :style="{
                   borderLeftColor: order.id === currentOrder?.id ? '#F59E0B' : '#10B981',
@@ -1172,44 +1202,40 @@
                   ACTIVE
                 </div>
 
-                <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:6px;">
                   <div>
                     <div style="font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:4px;">
                       {{ order.order_number }}
                     </div>
-                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                    <div style="display:flex; align-items:center; gap:6px;">
                       <span style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px;"
                         :style="getTypeBadgeStyle(order.type)">
                         {{ order.type?.replace('_', ' ') }}
                       </span>
-                      <span style="font-size:11px; color:#94A3B8;">
-                        {{ formatTime(order.created_at) }}
-                      </span>
+                      <span style="font-size:11px; color:#94A3B8;">{{ formatTime(order.created_at) }}</span>
                     </div>
                   </div>
                   <div style="text-align:right;">
-                    <div style="font-size:16px; font-weight:700; color:#F59E0B;">
+                    <div style="font-size:15px; font-weight:700; color:#F59E0B;">
                       Rs.{{ parseFloat(order.total || 0).toFixed(0) }}
                     </div>
-                    <div style="font-size:11px; color:#475569;">
-                      {{ order.items?.length || 0 }} items
-                    </div>
+                    <div style="font-size:11px; color:#475569;">{{ order.items?.length || 0 }} items</div>
                   </div>
                 </div>
 
-                <div style="font-size:12px; color:#94A3B8; margin-bottom:8px;">
+                <div style="font-size:12px; color:#94A3B8; margin-bottom:7px;">
                   {{ order.customer_name || 'Walk-in Customer' }}
                 </div>
 
-                <div style="display:flex; align-items:center; justify-content:space-between; padding-top:8px;
-                            border-top:1px solid rgba(37,43,56,0.5);">
-                  <div style="display:flex; align-items:center; gap:8px;">
+                <div style="display:flex; align-items:center; justify-content:space-between;
+                            padding-top:7px; border-top:1px solid rgba(37,43,56,0.5);">
+                  <div style="display:flex; align-items:center; gap:6px;">
                     <span style="font-size:10px; color:#10B981; font-weight:600;">KOT Sent</span>
                     <span style="font-size:10px; color:#475569;">
                       {{ order.items?.filter(i => i.kot_round).length || 0 }} items
                     </span>
                   </div>
-                  <div style="display:flex; align-items:center; gap:8px;">
+                  <div style="display:flex; align-items:center; gap:6px;">
                     <span style="font-size:10px; color:#F59E0B; font-weight:600;">New</span>
                     <span style="font-size:10px; color:#475569;">
                       {{ order.items?.filter(i => !i.kot_round && !i.is_void).length || 0 }} items
@@ -1220,11 +1246,11 @@
             </div>
           </div>
 
-          <div style="padding:16px; border-top:1px solid #252B38; flex-shrink:0;">
+          <div style="padding:14px; border-top:1px solid #252B38; flex-shrink:0;">
             <button @click="createNewDirectOrder"
               style="width:100%; padding:12px; background:linear-gradient(135deg,#10B981,#059669);
                      color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:700;
-                     cursor:pointer; min-height:48px; display:flex; align-items:center;
+                     cursor:pointer; min-height:46px; display:flex; align-items:center;
                      justify-content:center; gap:8px;">
               + Create New Order
             </button>
@@ -1951,14 +1977,10 @@ button {
 }
 
 input, textarea {
-  /* Force 16px on mobile to prevent iOS zoom */
   font-size: 16px !important;
 }
 
-/* Hide scrollbars globally */
-div::-webkit-scrollbar {
-  display: none;
-}
+div::-webkit-scrollbar { display: none; }
 
 /* ── Menu card grid ── */
 .menu-grid {
@@ -1967,7 +1989,6 @@ div::-webkit-scrollbar {
   gap: 7px;
 }
 
-/* ── Individual menu card ── */
 .menu-item-card {
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
@@ -1989,15 +2010,9 @@ div::-webkit-scrollbar {
   border-color: rgba(245,158,11,0.35);
 }
 
-.menu-item-card:active:not(:disabled) {
-  transform: scale(0.97);
-}
+.menu-item-card:active:not(:disabled) { transform: scale(0.97); }
+.menu-item-card:disabled { cursor: not-allowed; }
 
-.menu-item-card:disabled {
-  cursor: not-allowed;
-}
-
-/* ── Image wrapper ── */
 .item-img-wrap {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -2007,60 +2022,229 @@ div::-webkit-scrollbar {
   margin-bottom: 0;
 }
 
-/* ── Mobile breakpoints ── */
+/* ── Toast ── */
+.toast-enter-active, .toast-leave-active {
+  transition: opacity 0.25s, transform 0.25s;
+}
+.toast-enter-from, .toast-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(10px);
+}
+
+/* ══════════════════════════════════════════
+   MOBILE — 768px and below
+══════════════════════════════════════════ */
 @media (max-width: 768px) {
   .mobile-tabs         { display: flex !important; }
-  .desktop-order-types { display: none !important; }
-  .mobile-order-types  { display: flex !important; }
+  .desktop-order-types { display: none  !important; }
+  .mobile-order-types  { display: flex  !important; }
 
-  .kot-panel {
+  /* ── Panel switching — key: only active panel is visible ── */
+  .panel {
+    display: none !important;
+  }
+  .panel.panel-active {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
     width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    height: 100% !important;
+  }
+
+  /* Menu grid: 3 columns */
+  .menu-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+
+  /* ── Cart panel layout: strict flex column ── */
+  .cart-panel.panel-active {
+    background: #12151C !important;
+  }
+
+  /* Customer input strip — compact */
+  .cart-customer {
+    padding: 5px 10px !important;
+    flex-shrink: 0 !important;
+    border-bottom: 1px solid #252B38 !important;
+  }
+  .section-label {
+    font-size: 9px !important;
+    margin-bottom: 3px !important;
+  }
+  .cart-customer input {
+    padding: 7px 9px !important;
+    border-radius: 6px !important;
+    font-size: 16px !important;
+  }
+
+  /* Cart header — compact */
+  .cart-header {
+    padding: 6px 10px !important;
+    flex-shrink: 0 !important;
+    border-bottom: 1px solid #252B38 !important;
+  }
+  .cart-title  { font-size: 13px !important; }
+  .cart-meta   { font-size: 10px !important; }
+  .refresh-btn { 
+    padding: 4px 7px !important; 
+    font-size: 10px !important; 
+    min-height: 28px !important;
+    min-width: 28px !important;
+  }
+
+  /* ── Scrollable cart items — takes ALL remaining space ── */
+  .cart-items {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 8px !important;
+    min-height: 0 !important;
+  }
+
+  /* Item cards */
+  .cart-item-card {
+    padding: 7px 8px !important;
+    margin-bottom: 4px !important;
+    border-radius: 7px !important;
+  }
+
+  /* Qty controls */
+  .qty-btn {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 16px !important;
+    border-radius: 5px !important;
+  }
+  .qty-display {
+    font-size: 12px !important;
+    min-width: 20px !important;
+  }
+
+  /* Note / +Extra buttons */
+  .item-action-btn {
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+    min-height: 26px !important;
+    border-radius: 5px !important;
+  }
+
+  /* Send KOT inline */
+  .send-kot-inline {
+    padding: 9px !important;
+    font-size: 12px !important;
+    min-height: 40px !important;
+    margin-top: 5px !important;
+    border-radius: 8px !important;
+  }
+
+  /* Round headers */
+  .round-label { font-size: 9px !important; }
+  .round-time  { font-size: 9px !important; }
+
+  /* Sent item rows */
+  .sent-item-row {
+    padding: 6px 8px !important;
+    border-radius: 7px !important;
+    margin-bottom: 3px !important;
+  }
+  .sent-name   { font-size: 11px !important; }
+  .sent-badge  { font-size: 10px !important; }
+  .sent-price  { font-size: 10px !important; }
+  .status-pill { font-size: 8px !important; padding: 1px 5px !important; }
+  .advance-btn { 
+    font-size: 9px !important; 
+    padding: 3px 7px !important; 
+    min-height: 24px !important; 
+  }
+
+  /* ── Totals — pinned, never scrolls ── */
+  .cart-totals {
+    flex-shrink: 0 !important;
+    padding: 6px 12px 5px !important;
+    border-top: 1px solid #252B38 !important;
+    background: #12151C !important;
+  }
+  .totals-row   { font-size: 11px !important; margin-bottom: 2px !important; }
+  .totals-total { font-size: 13px !important; padding-top: 5px !important; margin-top: 4px !important; }
+
+  /* ── Cart footer — pinned at bottom, never scrolls ── */
+  .cart-footer {
+    flex-shrink: 0 !important;
+    padding: 6px 10px !important;
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 10px)) !important;
+    border-top: 1px solid #252B38 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+    background: #12151C !important;
+    position:relative;
+    bottom: 150px !important;
+  }
+
+  .unsent-warn {
+    font-size: 10px !important;
+    padding: 3px 8px !important;
+    border-radius: 5px !important;
+  }
+
+  .btn-send-kot {
+    padding: 9px !important;
+    font-size: 13px !important;
+    min-height: 40px !important;
+    border-radius: 8px !important;
+  }
+
+  .btn-charge {
+    padding: 10px !important;
+    font-size: 13px !important;
+    min-height: 44px !important;
+    border-radius: 8px !important;
+  }
+
+  .btn-delete {
+    padding: 6px !important;
+    font-size: 11px !important;
+    min-height: 32px !important;
+    border-radius: 7px !important;
+  }
+
+  /* ── KOT panel full width ── */
+  .kot-panel.panel-active {
     border-right: none !important;
   }
 
-  .cart-panel {
-    width: 100% !important;
-  }
-
-  .panel {
-    flex: none !important;
-    overflow: hidden !important;
-  }
-
-  .panel.panel-active {
-    flex: 1 !important;
-    overflow: hidden !important;
-  }
-
-  .panel:not(.panel-active) {
-    width: 0 !important;
-    min-width: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    visibility: hidden !important;
-  }
-
-  .menu-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
+  /* ── Menu panel full width ── */
+  .menu-panel.panel-active {
+    border-right: none !important;
   }
 }
 
+/* ══════════════════════════════════════════
+   SMALL MOBILE — 480px and below
+══════════════════════════════════════════ */
 @media (max-width: 480px) {
-  .menu-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-  }
-}
+  .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 5px; }
 
-/* ── Toast transition ── */
-.toast-enter-active,
-.toast-leave-active {
-  transition: opacity 0.25s, transform 0.25s;
-}
-.toast-enter-from,
-.toast-leave-to {
-  opacity: 0;
-  transform: translateX(-50%) translateY(10px);
+  .mobile-tabs button { 
+    padding: 5px 8px !important; 
+    font-size: 10px !important; 
+    min-height: 32px !important; 
+  }
+
+  .cart-items { padding: 6px !important; }
+  .cart-item-card { padding: 6px 7px !important; }
+  .qty-btn { width: 28px !important; height: 28px !important; font-size: 15px !important; }
+
+  .cart-totals { padding: 5px 10px 4px !important; }
+  .totals-total { font-size: 13px !important; }
+
+  .cart-footer { 
+    padding: 5px 8px !important; 
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 8px)) !important; 
+    gap: 4px !important; 
+  }
+  .btn-charge    { min-height: 42px !important; font-size: 13px !important; }
+  .btn-send-kot  { min-height: 36px !important; font-size: 12px !important; }
+  .btn-delete    { min-height: 28px !important; font-size: 10px !important; }
 }
 </style>

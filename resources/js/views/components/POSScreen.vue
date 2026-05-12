@@ -1058,6 +1058,9 @@ div::-webkit-scrollbar { display: none; }
   overflow-y: auto;
   padding: 6px;
   -webkit-overflow-scrolling: touch;
+  /* Ensure scroll area doesn't push charge button out of viewport */
+  max-height: calc(100vh - 280px);
+  min-height: 200px;
 }
 
 /* Search Bar */
@@ -1314,6 +1317,10 @@ div::-webkit-scrollbar { display: none; }
   border-top: 1px solid #252B38;
   margin-top: auto; /* Push to bottom of flex container */
   min-height: 120px; /* Ensure charge button always visible */
+  max-height: 140px; /* Prevent taking too much space */
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
 }
 .unsent-warning {
   font-size: 9px; color: #F59E0B; text-align: center; padding: 4px 6px;
@@ -1456,6 +1463,45 @@ div::-webkit-scrollbar { display: none; }
     width: 100% !important;
     height: 100vh !important;
     height: 100dvh !important; /* Dynamic viewport height for mobile */
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Mobile: Ensure charge button is always visible */
+  .cart-scroll {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    max-height: calc(100dvh - 200px) !important; /* Leave space for header + actions */
+    min-height: 100px !important;
+  }
+
+  .cart-actions {
+    position: fixed !important;
+    bottom: 15% !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #12151C !important;
+    border-top: 2px solid #252B38 !important;
+    min-height: 140px !important;
+    max-height: 160px !important;
+    padding: 12px 16px !important;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 50 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .charge-btn {
+    min-height: 52px !important;
+    font-size: 16px !important;
+    padding: 14px !important;
+    font-weight: 700 !important;
+    margin-top: auto !important;
+    border-radius: 8px !important;
+  }
+
+  /* Ensure cart content doesn't overlap with fixed actions */
+  .cart-scroll {
+    padding-bottom: 160px !important; /* Account for fixed actions */
   }
 }
 </style>
