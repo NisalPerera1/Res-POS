@@ -207,7 +207,13 @@ class DashboardController extends Controller
     {
         $today = now()->format('Y-m-d');
 
-        $orders = Order::whereDate('created_at', $today)
+        $orders = Order::where(function($query) use ($today) {
+                $query->whereDate('completed_at', $today)
+                      ->orWhere(function($q) use ($today) {
+                          $q->whereNull('completed_at')
+                            ->whereDate('created_at', $today);
+                      });
+            })
             ->whereIn('payment_status', self::PAID_STATUSES)
             ->with(['table', 'items'])
             ->get();
@@ -235,8 +241,15 @@ class DashboardController extends Controller
         $weekStart = now()->startOfWeek()->format('Y-m-d');
         $weekEnd   = now()->format('Y-m-d');
 
-        $orders = Order::whereDate('created_at', '>=', $weekStart)
-            ->whereDate('created_at', '<=', $weekEnd)
+        $orders = Order::where(function($query) use ($weekStart, $weekEnd) {
+                $query->whereDate('completed_at', '>=', $weekStart)
+                      ->whereDate('completed_at', '<=', $weekEnd)
+                      ->orWhere(function($q) use ($weekStart, $weekEnd) {
+                          $q->whereNull('completed_at')
+                            ->whereDate('created_at', '>=', $weekStart)
+                            ->whereDate('created_at', '<=', $weekEnd);
+                      });
+            })
             ->whereIn('payment_status', self::PAID_STATUSES)
             ->with(['table', 'items'])
             ->get();
@@ -247,7 +260,10 @@ class DashboardController extends Controller
 
         $dailyBreakdown = [];
         for ($date = $weekStart; $date <= $weekEnd; $date = date('Y-m-d', strtotime($date . ' +1 day'))) {
-            $dayOrders        = $orders->filter(fn($o) => $o->created_at->format('Y-m-d') === $date);
+            $dayOrders = $orders->filter(function($o) use ($date) {
+                $completionDate = $o->completed_at ? $o->completed_at->format('Y-m-d') : $o->created_at->format('Y-m-d');
+                return $completionDate === $date;
+            });
             $dailyBreakdown[] = [
                 'date'    => $date,
                 'revenue' => round($dayOrders->sum('total'), 2),
@@ -270,8 +286,15 @@ class DashboardController extends Controller
         $monthStart = now()->startOfMonth()->format('Y-m-d');
         $monthEnd   = now()->format('Y-m-d');
 
-        $orders = Order::whereDate('created_at', '>=', $monthStart)
-            ->whereDate('created_at', '<=', $monthEnd)
+        $orders = Order::where(function($query) use ($monthStart, $monthEnd) {
+                $query->whereDate('completed_at', '>=', $monthStart)
+                      ->whereDate('completed_at', '<=', $monthEnd)
+                      ->orWhere(function($q) use ($monthStart, $monthEnd) {
+                          $q->whereNull('completed_at')
+                            ->whereDate('created_at', '>=', $monthStart)
+                            ->whereDate('created_at', '<=', $monthEnd);
+                      });
+            })
             ->whereIn('payment_status', self::PAID_STATUSES)
             ->with(['table', 'items'])
             ->get();
@@ -293,12 +316,34 @@ class DashboardController extends Controller
     {
         $query = Order::with(['table', 'items'])
             ->whereIn('payment_status', self::PAID_STATUSES)
+            ->orderBy('completed_at', 'desc')
             ->orderBy('created_at', 'desc');
 
+        $today = now()->format('Y-m-d');
         match ($period) {
-            'today' => $query->whereDate('created_at', now()->format('Y-m-d')),
-            'week'  => $query->whereDate('created_at', '>=', now()->startOfWeek()->format('Y-m-d')),
-            'month' => $query->whereDate('created_at', '>=', now()->startOfMonth()->format('Y-m-d')),
+            'today' => $query->where(function($q) use ($today) {
+                $q->whereDate('completed_at', $today)
+                  ->orWhere(function($sub) use ($today) {
+                      $sub->whereNull('completed_at')
+                          ->whereDate('created_at', $today);
+                  });
+            }),
+            'week'  => $query->where(function($q) {
+                $weekStart = now()->startOfWeek()->format('Y-m-d');
+                $q->whereDate('completed_at', '>=', $weekStart)
+                  ->orWhere(function($sub) use ($weekStart) {
+                      $sub->whereNull('completed_at')
+                          ->whereDate('created_at', '>=', $weekStart);
+                  });
+            }),
+            'month' => $query->where(function($q) {
+                $monthStart = now()->startOfMonth()->format('Y-m-d');
+                $q->whereDate('completed_at', '>=', $monthStart)
+                  ->orWhere(function($sub) use ($monthStart) {
+                      $sub->whereNull('completed_at')
+                          ->whereDate('created_at', '>=', $monthStart);
+                  });
+            }),
             default => null,
         };
 
@@ -314,6 +359,7 @@ class DashboardController extends Controller
                 'payment_status' => $order->payment_status,
                 'order_type'     => $order->order_type,
                 'created_at'     => $order->created_at->toISOString(),
+                'completed_at'   => $order->completed_at ? $order->completed_at->toISOString() : null,
                 'items_count'    => $order->items ? $order->items->count() : 0,
             ];
         })->toArray();
@@ -344,11 +390,17 @@ class DashboardController extends Controller
         $today = now()->format('Y-m-d');
 
         $hourlyData = Order::selectRaw('
-                HOUR(created_at) as hour,
+                COALESCE(HOUR(completed_at), HOUR(created_at)) as hour,
                 COUNT(*) as orders,
                 SUM(total) as revenue
             ')
-            ->whereDate('created_at', $today)
+            ->where(function($query) use ($today) {
+                $query->whereDate('completed_at', $today)
+                      ->orWhere(function($q) use ($today) {
+                          $q->whereNull('completed_at')
+                            ->whereDate('created_at', $today);
+                      });
+            })
             ->whereIn('payment_status', self::PAID_STATUSES)
             ->groupBy('hour')
             ->orderBy('hour')

@@ -47,29 +47,21 @@
         <div>
           <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);
                       font-weight:600; margin-bottom:8px; padding:0 8px;">
-            Main
+          
           </div>
           <div style="display:flex; flex-direction:column; gap:2px;">
             <NavBtn :to="{ name: 'dashboard' }"     icon="dashboard"  label="Dashboard"  :wide="true" />
             <NavBtn :to="{ name: 'tables' }"        icon="grid"       label="Tables"     :wide="true" />
             <NavBtn :to="{ name: 'direct-order' }" icon="arrow"      label="Takeaway Order" :wide="true" />
             <NavBtn :to="{ name: 'kitchen' }"      icon="chef"       label="Kitchen"    :wide="true" />
-          </div>
-        </div>
-
-        <!-- Management (Admin only) -->
-        <div v-if="auth.isAdmin">
-          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);
-                        font-weight:600; margin-bottom:8px; padding:0 8px;">
-            Management
-          </div>
-          <div style="display:flex; flex-direction:column; gap:2px;">
             <NavBtn :to="{ name: 'menu' }"         icon="menu"       label="Menu Management" :wide="true" />
             <NavBtn :to="{ name: 'staff' }"        icon="users"      label="Staff Management" :wide="true" />
             <NavBtn :to="{ name: 'reports' }"      icon="chart"      label="Reports"          :wide="true" />
             <NavBtn :to="{ name: 'recent-orders' }" icon="receipt"    label="Recent Orders"     :wide="true" />
           </div>
         </div>
+
+
       </div>
 
       <!-- Bottom Section -->
@@ -106,10 +98,7 @@
             <div style="font-size:11px; color:var(--text-secondary); text-transform:capitalize;">
               {{ auth.user?.role || 'admin' }}
             </div>
-            <!-- Session Timer -->
-            <div style="font-size:10px; font-family:monospace;" :style="{ color: sessionColor }">
-              Session: {{ formatSessionTime() }}
-            </div>
+           
           </div>
         </div>
 

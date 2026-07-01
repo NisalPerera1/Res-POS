@@ -301,7 +301,11 @@
     <div class="tz-item-hero__content">
         <div class="tz-item-hero__img">
             @if(!empty($item->image))
-                <img src="{{ '/storage/menu_items/' . $item->image }}" alt="{{ $item->name }}" loading="lazy">
+                @php
+                    $imagePath = storage_path('app/public/menu_items/' . $item->image);
+                    $timestamp = file_exists($imagePath) ? filemtime($imagePath) : time();
+                @endphp
+                <img src="{{ '/storage/menu_items/' . $item->image . '?v=' . $timestamp }}" alt="{{ $item->name }}" loading="lazy">
             @else
                 <div class="tz-item-hero__placeholder">&#127859;</div>
             @endif

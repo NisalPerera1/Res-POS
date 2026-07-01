@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Management;
 
 use App\Http\Controllers\Controller;
+use App\Imports\MenuItemImport;
 use App\Models\Category;
 use App\Models\MenuItem;
 use App\Models\Modifier;
 use App\Models\ModifierGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class MenuController extends Controller
 {
@@ -327,5 +329,50 @@ class MenuController extends Controller
         }
 
         return response()->json(['success' => false, 'message' => 'No file uploaded'], 400);
+    }
+
+    /**
+     * POST /menu/items/bulk-import
+     * Bulk import menu items from Excel file
+     */
+    public function bulkImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240'
+        ]);
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $filePath = $file->storeAs('imports', 'menu_items_' . time() . '.' . $file->getClientOriginalExtension());
+
+            $fullPath = Storage::path($filePath);
+            $import = new MenuItemImport($fullPath);
+            $result = $import->import();
+
+            // Clean up the file
+            Storage::delete($filePath);
+
+            return response()->json($result);
+        }
+
+        return response()->json(['success' => false, 'message' => 'No file uploaded'], 400);
+    }
+
+    /**
+     * GET /menu/items/import-template
+     * Download import template
+     */
+    public function downloadImportTemplate()
+    {
+        $csvContent = "Category,Name,Description,Price,Cost Price,SKU,Type,Is Available,Is Popular,Is Instant,Prep Time,Sort Order,Icon\n";
+        $csvContent .= "Burgers,Classic Burger,Juicy beef patty with fresh vegetables,12.99,8.50,BURG001,food,true,false,false,15,1,🍔\n";
+        $csvContent .= "Burgers,Cheese Burger,Beef patty with melted cheese,14.99,10.00,BURG002,food,true,false,false,15,2,🍔\n";
+        $csvContent .= "Beverages,Cola,Refreshing cola drink,2.99,1.00,BEV001,beverage,true,false,false,2,1,🥤\n";
+        $csvContent .= "Beverages,Orange Juice,Fresh orange juice,3.99,2.00,BEV002,beverage,true,false,false,2,2,🧃\n";
+        $csvContent .= "Desserts,Chocolate Cake,Rich chocolate cake,6.99,4.00,DES001,dessert,true,false,false,5,1,🍰\n";
+
+        return response($csvContent)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="menu_items_import_template.csv"');
     }
 }

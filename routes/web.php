@@ -5,6 +5,7 @@ use App\Http\Controllers\Public\QrOrderController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\MenuController;
 use App\Http\Controllers\Web\SpecialsController;
+use App\Http\Controllers\Web\KOTPreviewController;
 
 // Public website
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -20,6 +21,9 @@ Route::get('/menu/{id}', [MenuController::class, 'show'])->name('menu.show');
 Route::get('/productions', fn () => view('productions'))->name('productions');
 Route::get('/contact', fn () => view('contact'))->name('contact');
 Route::get('/specials', [SpecialsController::class, 'index'])->name('specials');
+
+// KOT Preview (for testing without printer)
+Route::get('/kot/preview/{orderId}', [KOTPreviewController::class, 'preview'])->name('kot.preview');
 
 // Optional public pages (placeholders for your CMS later)
 Route::get('/gallery', fn () => view('home'));

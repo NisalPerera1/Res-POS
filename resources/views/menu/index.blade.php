@@ -509,7 +509,11 @@ body {
                             <a href="{{ url('/menu/'.$item->id) }}" class="tz-item">
                                 <div class="tz-item__thumb">
                                     @if(!empty($item->image))
-                                        <img src="{{ '/storage/menu_items/'.$item->image }}" alt="{{ $item->name }}" loading="lazy">
+                                        @php
+                                            $imagePath = storage_path('app/public/menu_items/' . $item->image);
+                                            $timestamp = file_exists($imagePath) ? filemtime($imagePath) : time();
+                                        @endphp
+                                        <img src="{{ '/storage/menu_items/'.$item->image.'?v='.$timestamp }}" alt="{{ $item->name }}" loading="lazy">
                                     @else
                                         <div class="tz-item__thumb-placeholder">{{ $item->icon ?? '🍽' }}</div>
                                     @endif

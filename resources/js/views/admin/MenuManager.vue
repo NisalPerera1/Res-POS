@@ -95,6 +95,13 @@
                  -webkit-tap-highlight-color:transparent; touch-action:manipulation;">
           + Add Item
         </button>
+        <button @click="openImportModal" class="btn-info"
+          style="padding:8px 14px; background:#3B82F6; color:#fff; border:none;
+                 border-radius:7px; font-size:13px; font-weight:600; cursor:pointer;
+                 min-height:38px; white-space:nowrap; flex-shrink:0;
+                 -webkit-tap-highlight-color:transparent; touch-action:manipulation;">
+          📥 Bulk Import
+        </button>
       </div>
 
       <!-- Items grid -->
@@ -107,8 +114,11 @@
               <div style="flex:1; min-width:0;">
                 <div v-if="item.image"
                   style="width:100%; aspect-ratio:16/9; border-radius:8px; margin-bottom:8px;
-                         background-size:cover; background-position:center; background-color:#1A1E28;"
-                  :style="{ backgroundImage: 'url(/storage/menu_items/' + item.image + ')' }"></div>
+                         overflow:hidden; background-color:#1A1E28;">
+                  <img :src="'/storage/menu_items/' + item.image + '?t=' + (item.updated_at || Date.now())"
+                       :alt="item.name"
+                       style="width:100%; height:100%; object-fit:cover;" />
+                </div>
                 <div v-else
                   style="width:100%; aspect-ratio:16/9; border-radius:8px; margin-bottom:8px;
                          background-color:#2D3748; display:flex; align-items:center;
@@ -621,7 +631,7 @@
                     style="width:100%; padding:8px; background:#12151C; border:1px solid #252B38;
                            border-radius:8px; color:#F1F5F9; font-size:13px; outline:none; box-sizing:border-box;" />
                   <div v-if="itemForm.image" style="margin-top:6px;">
-                    <img :src="'/storage/menu_items/' + itemForm.image"
+                    <img :src="'/storage/menu_items/' + itemForm.image + '?t=' + Date.now()"
                          style="width:100%; aspect-ratio:16/9; border-radius:8px; object-fit:cover;" />
                   </div>
                 </div>
@@ -850,6 +860,60 @@
       </div>
     </Teleport>
 
+    <!-- Bulk Import Modal -->
+    <Teleport to="body">
+      <div v-if="showImportModal"
+        style="position:fixed; inset:0; background:rgba(0,0,0,0.65);
+               display:flex; align-items:flex-end; justify-content:center; z-index:100;"
+        @click.self="showImportModal = false">
+        <div style="background:#1A1E28; border:1px solid #252B38; border-radius:20px 20px 0 0;
+                    padding:20px 16px; width:100%; max-width:480px;
+                    padding-bottom:calc(20px + env(safe-area-inset-bottom, 0px));">
+          <div style="width:40px; height:4px; background:#252B38; border-radius:2px; margin:0 auto 16px;"></div>
+          <div style="font-size:16px; font-weight:700; color:#F1F5F9; margin-bottom:16px;">
+            📥 Bulk Import Menu Items
+          </div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div>
+              <label style="font-size:11px; color:#64748B; display:block; margin-bottom:5px;
+                             text-transform:uppercase; letter-spacing:0.05em;">Upload File (CSV/Excel)</label>
+              <input type="file" @change="handleImportFile" accept=".csv,.xlsx,.xls"
+                style="width:100%; padding:12px; background:#12151C; border:1px solid #252B38;
+                       border-radius:8px; color:#F1F5F9; font-size:13px; outline:none; box-sizing:border-box;" />
+            </div>
+            <div style="padding:12px; background:rgba(59,130,246,0.1); border-radius:8px; border:1px solid rgba(59,130,246,0.2);">
+              <div style="font-size:12px; font-weight:600; color:#3B82F6; margin-bottom:8px;">📋 Required Columns:</div>
+              <div style="font-size:11px; color:#94A3B8; line-height:1.6;">
+                • Category (required)<br>
+                • Name (required)<br>
+                • Price (required)<br>
+                • Description, Cost Price, SKU, Type, Is Available, Is Popular, Is Instant, Prep Time, Sort Order, Icon (optional)
+              </div>
+            </div>
+            <button @click="downloadTemplate"
+              style="padding:10px 14px; background:rgba(16,185,129,0.1); color:#10B981;
+                     border:1px solid rgba(16,185,129,0.3); border-radius:8px; cursor:pointer;
+                     font-size:13px; font-weight:600; -webkit-tap-highlight-color:transparent; touch-action:manipulation;">
+              📥 Download Template
+            </button>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:16px;">
+            <button @click="showImportModal = false"
+              style="flex:1; padding:14px; background:transparent; color:#64748B;
+                     border:1px solid #252B38; border-radius:10px; cursor:pointer; font-size:14px;
+                     min-height:50px; -webkit-tap-highlight-color:transparent;">Cancel</button>
+            <button @click="importItems" :disabled="!importFile || importLoading"
+              style="flex:2; padding:14px; background:#3B82F6; color:#fff; border:none;
+                     border-radius:10px; cursor:pointer; font-weight:700; font-size:14px; min-height:50px;
+                     -webkit-tap-highlight-color:transparent;"
+              :style="{ opacity: (!importFile || importLoading) ? 0.6 : 1 }">
+              {{ importLoading ? '⏳ Importing...' : '📥 Import Items' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
     <!-- Modifier Option Modal -->
     <Teleport to="body">
       <div v-if="showModifierModal"
@@ -965,11 +1029,16 @@ const pricingLoading         = ref(false)
 const pricingSaving          = ref(false)
 const allModifiers           = ref([])
 
+// ── Import state ───────────────────────────────────────────
+const importFile    = ref(null)
+const importLoading = ref(false)
+
 // ── Modal visibility ──────────────────────────────────────
 const showCategoryModal = ref(false)
 const showItemModal     = ref(false)
 const showGroupModal    = ref(false)
 const showModifierModal = ref(false)
+const showImportModal   = ref(false)
 
 // ── Editing targets ───────────────────────────────────────
 const editingCategory = ref(null)
@@ -1149,6 +1218,71 @@ async function deleteItem(item) {
     showToast('Item deleted')
     await loadMenuItems()
   } catch (e) { showToast(e.response?.data?.message ?? 'Cannot delete', 'error') }
+}
+
+// ── Bulk Import ─────────────────────────────────────────────
+function openImportModal() {
+  importFile.value = null
+  showImportModal.value = true
+}
+
+function handleImportFile(event) {
+  const file = event.target.files[0]
+  if (file) {
+    importFile.value = file
+  }
+}
+
+async function importItems() {
+  if (!importFile.value) {
+    showToast('Please select a file', 'error')
+    return
+  }
+
+  importLoading.value = true
+  const formData = new FormData()
+  formData.append('file', importFile.value)
+
+  try {
+    const { data } = await axios.post('/menu/items/bulk-import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+
+    if (data.success) {
+      showToast(`Imported ${data.imported} items successfully`)
+      if (data.errors && data.errors.length > 0) {
+        console.warn('Import errors:', data.errors)
+        showToast(`${data.errors.length} rows had errors (check console)`, 'error')
+      }
+      showImportModal.value = false
+      await loadMenuItems()
+    } else {
+      showToast(data.message || 'Import failed', 'error')
+    }
+  } catch (e) {
+    showToast(e.response?.data?.message ?? 'Import failed', 'error')
+  } finally {
+    importLoading.value = false
+  }
+}
+
+async function downloadTemplate() {
+  try {
+    const response = await axios.get('/api/menu/items/import-template', {
+      responseType: 'blob'
+    })
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', 'menu_items_import_template.csv')
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+    showToast('Template downloaded')
+  } catch (e) {
+    showToast('Failed to download template', 'error')
+  }
 }
 
 // ── Modifier Groups ───────────────────────────────────────

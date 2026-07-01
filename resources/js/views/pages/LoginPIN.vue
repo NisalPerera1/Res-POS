@@ -13,9 +13,18 @@
       </div>
 
       <!-- ── Loading ── -->
-      <div v-if="loadingUsers" class="state-msg">
+      <div v-if="loadingUsers && !loadError" class="state-msg">
         <span class="spinner" />
         <span>Loading staff…</span>
+      </div>
+
+      <!-- ── Skeleton loading (when users are loading) ── -->
+      <div v-if="loadingUsers && !loadError" class="skeleton-grid">
+        <div v-for="i in 6" :key="i" class="skeleton-card">
+          <div class="skeleton-avatar" />
+          <div class="skeleton-name" />
+          <div class="skeleton-role" />
+        </div>
       </div>
 
       <!-- ── Load Error ── -->
@@ -57,7 +66,7 @@
         <div class="divider-v" />
 
         <!-- RIGHT: PIN panel -->
-        <div class="panel-pin" :class="{ visible: !!selectedUser }">
+        <div class="panel-pin" :class="{ visible: !!selectedUser, success: loginSuccess }">
 
           <!-- Empty state -->
           <div v-if="!selectedUser" class="pin-placeholder">
@@ -92,8 +101,13 @@
               <div
                 v-for="i in 4" :key="i"
                 class="dot"
-                :class="{ filled: pin.length >= i, error: pinError }"
+                :class="{ filled: pin.length >= i, error: pinError, pulsing: pin.length === i - 1 }"
               />
+            </div>
+
+            <!-- PIN progress -->
+            <div class="pin-progress">
+              <div class="progress-bar" :style="{ width: (pin.length / 4) * 100 + '%' }" />
             </div>
 
             <!-- PIN label -->
@@ -117,10 +131,11 @@
                   'key-zero':   key === '0',
                 }"
                 @click="pressKey(key)"
-                @mousedown="e => e.currentTarget.classList.add('pressed')"
+                @mousedown="e => { e.currentTarget.classList.add('pressed'); keyPressed.value = key }"
                 @mouseup="e => e.currentTarget.classList.remove('pressed')"
                 @mouseleave="e => e.currentTarget.classList.remove('pressed')"
               >
+                <span class="ripple" v-if="keyPressed === key" />
                 <template v-if="key === '⌫'">
                   <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                     <path d="M7 4H15a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H7l-4-5 4-5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
@@ -163,6 +178,8 @@ const pinError     = ref('')
 const loadingUsers = ref(true)
 const loadError    = ref('')
 const pinKeys      = ['1','2','3','4','5','6','7','8','9','⌫','0','↵']
+const loginSuccess = ref(false)
+const keyPressed   = ref(null)
 
 // Detect mobile for conditional dimming
 const isMobile = computed(() => window.innerWidth < 768)
@@ -243,11 +260,14 @@ async function attemptLogin() {
   if (pin.value.length < 4) { pinError.value = 'Enter all 4 digits'; return }
   try {
     await auth.loginWithPin(pin.value)
-    router.push(
-      (auth.user?.role ?? '').toLowerCase() === 'kitchen'
-        ? { name: 'kitchen' }
-        : { name: 'dashboard' }
-    )
+    loginSuccess.value = true
+    setTimeout(() => {
+      router.push(
+        (auth.user?.role ?? '').toLowerCase() === 'kitchen'
+          ? { name: 'kitchen' }
+          : { name: 'dashboard' }
+      )
+    }, 800)
   } catch (e) {
     pinError.value = e.response?.data?.errors?.pin?.[0]
                   ?? e.response?.data?.message
@@ -401,11 +421,39 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   display: flex;
   flex-direction: row;
   width: 100%;
-  background: var(--bg-card);
+  background: rgba(15, 18, 24, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border);
   border-radius: 20px;
   overflow: hidden;
-  /* let content dictate height — no fixed min-height */
+  position: relative;
+  animation: fadeInUp 0.6s ease-out;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+              0 0 0 1px rgba(245, 158, 11, 0.05);
+}
+.two-panel::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 21px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), transparent 40%, transparent 60%, rgba(245, 158, 11, 0.1));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ─── Left: user grid ───────────────────────────────────── */
@@ -414,8 +462,13 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   min-width: 0;
   padding: 24px;
   transition: opacity 0.2s;
+  animation: fadeIn 0.5s ease-out 0.1s both;
 }
 .panel-users.dimmed { opacity: 0.45; }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
 .panel-label {
   font-size: 10px;
@@ -441,17 +494,34 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  transition: all 0.15s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.user-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(245, 158, 11, 0.1), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 .user-card:hover {
   border-color: var(--border-hi);
   background: #1A2030;
-  transform: translateY(-2px);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3),
+              0 0 0 1px rgba(245, 158, 11, 0.1);
+}
+.user-card:hover::before {
+  opacity: 1;
 }
 .user-card.active {
   border-color: var(--accent);
   background: var(--accent-dim);
-  transform: translateY(-2px);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.15),
+              0 0 0 2px rgba(245, 158, 11, 0.2);
 }
 
 .avatar {
@@ -466,6 +536,12 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   font-size: 14px;
   color: #fff;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.user-card:hover .avatar {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 .user-name {
   font-size: 13px;
@@ -595,22 +671,55 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   border-radius: 50%;
   background: #1A1F2E;
   border: 1.5px solid var(--border-hi);
-  transition: all 0.15s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .dot.filled {
-  background: var(--accent);
+  background: white;
   border-color: var(--accent);
-  box-shadow: 0 0 8px var(--accent-glow);
+  box-shadow: 0 0 12px var(--accent-glow),
+              0 0 24px rgba(245, 158, 11, 0.3);
+  transform: scale(1.1);
+}
+.dot.pulsing {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  }
+  50% {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+  }
 }
 .dot.error {
   background: var(--error);
   border-color: var(--error);
-  animation: shake 0.3s ease;
+  animation: shake 0.4s ease;
 }
 @keyframes shake {
-  0%,100% { transform: translateX(0); }
-  25%      { transform: translateX(-4px); }
-  75%      { transform: translateX(4px); }
+  0%, 100% { transform: translateX(0) scale(1); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px) scale(1.05); }
+  20%, 40%, 60%, 80% { transform: translateX(4px) scale(1.05); }
+}
+
+/* ─── PIN progress ───────────────────────────────────────── */
+.pin-progress {
+  width: 100%;
+  max-width: 140px;
+  height: 3px;
+  background: var(--border-mid);
+  border-radius: 2px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #FBBF24);
+  border-radius: 2px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 8px var(--accent-glow);
 }
 
 .pin-hint {
@@ -652,21 +761,43 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   font-weight: 400;
   color: var(--text-mid);
   font-family: 'Syne', sans-serif;
-  transition: all 0.1s;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  position: relative;
+  overflow: hidden;
 }
 .num-key:hover {
   background: #1A2030;
   border-color: var(--border-hi);
   color: #F1F5F9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 .num-key.pressed {
-  transform: scale(0.93);
+  transform: scale(0.95);
   background: var(--border-mid);
+}
+.ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: radial-gradient(circle at center, rgba(245, 158, 11, 0.3), transparent 70%);
+  animation: rippleEffect 0.4s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes rippleEffect {
+  from {
+    opacity: 1;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.5);
+  }
 }
 .key-zero  { grid-column: 2; }
 .key-action { font-size: 14px; color: #64748B; }
@@ -680,12 +811,73 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   border-color: rgba(245,158,11,0.4);
 }
 
+/* ─── Skeleton loading ───────────────────────────────────── */
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  padding: 24px;
+}
+.skeleton-card {
+  background: var(--bg-item);
+  border: 1px solid var(--border-mid);
+  border-radius: 14px;
+  padding: 16px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.skeleton-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, var(--border-mid) 25%, var(--border-hi) 50%, var(--border-mid) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+.skeleton-name {
+  width: 60px;
+  height: 12px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--border-mid) 25%, var(--border-hi) 50%, var(--border-mid) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+.skeleton-role {
+  width: 40px;
+  height: 10px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--border-mid) 25%, var(--border-hi) 50%, var(--border-mid) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Success animation ────────────────────────────────────── */
+.panel-pin.success .pin-dots .dot {
+  background: #10B981;
+  border-color: #10B981;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+  animation: successPulse 0.6s ease-out;
+}
+@keyframes successPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
 /* ─── Demo hint ─────────────────────────────────────────── */
 .demo-hint {
   font-size: 11px;
   color: var(--text-mute);
   letter-spacing: 0.02em;
   text-align: center;
+  animation: fadeIn 0.8s ease-out 0.4s both;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -776,7 +968,23 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   .pin-dots    { gap: 12px; margin-bottom: 6px; justify-content: center; }
   .dot         { width: 13px; height: 13px; }
 
+  .pin-progress { margin-bottom: 12px; max-width: 120px; }
+
   .pin-hint    { font-size: 11px; margin-bottom: 6px; text-align: center; }
+
+  /* Skeleton loading on mobile */
+  .skeleton-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 7px;
+    padding: 12px;
+  }
+  .skeleton-card {
+    padding: 10px 6px;
+    border-radius: 10px;
+  }
+  .skeleton-avatar { width: 36px; height: 36px; }
+  .skeleton-name { width: 50px; height: 10px; }
+  .skeleton-role { width: 35px; height: 8px; }
 
   /* Hide keyboard hint on mobile — irrelevant on touch devices */
   .keyboard-hint { display: none; }
@@ -817,6 +1025,18 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 
   .pin-dots    { gap: 10px; }
   .dot         { width: 12px; height: 12px; }
+
+  .pin-progress { max-width: 100px; margin-bottom: 10px; }
+
+  /* Skeleton on small phones */
+  .skeleton-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 10px;
+  }
+  .skeleton-avatar { width: 34px; height: 34px; }
+  .skeleton-name { width: 45px; height: 9px; }
+  .skeleton-role { width: 30px; height: 7px; }
 }
 
 /* ── Very small phones ≤ 360px ── */
@@ -829,5 +1049,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   .user-name { font-size: 10px; }
 
   .num-key   { padding: 10px 0; font-size: 16px; }
+
+  .pin-progress { max-width: 90px; }
 }
 </style>

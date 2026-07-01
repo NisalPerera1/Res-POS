@@ -259,15 +259,20 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import axios from 'axios'
 import Chart from 'chart.js/auto'
 
 const auth = useAuthStore()
+const route = useRoute()
 
 // ─── Theme ───────────────────────────────────────────────────────────────────
 const isDarkTheme = ref(localStorage.getItem('theme') !== 'light')
+
+// ─── Auto-refresh ─────────────────────────────────────────────────────────────
+let refreshInterval = null
 
 // ─── State ───────────────────────────────────────────────────────────────────
 const loading    = ref(false)
@@ -523,6 +528,24 @@ function openWebsite() {
 onMounted(async () => {
   await loadDashboardData()
   watchThemeChanges()
+  
+  // Auto-refresh every 30 seconds
+  refreshInterval = setInterval(() => {
+    loadDashboardData()
+  }, 30000)
+})
+
+onUnmounted(() => {
+  if (refreshInterval) {
+    clearInterval(refreshInterval)
+  }
+})
+
+// Refresh when navigating to dashboard
+watch(() => route.name, (newRoute) => {
+  if (newRoute === 'dashboard') {
+    loadDashboardData()
+  }
 })
 </script>
 
