@@ -3,8 +3,6 @@
     style="background:#1A1E28; border:1px solid #252B38; border-radius:16px;
            width:420px; max-width:94vw; max-height:92vh; overflow:hidden;
            display:flex; flex-direction:column;
-               position: relative;
-               bottom: 60px;
            box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);"
   >
 
@@ -578,18 +576,18 @@ const serviceChargeRate = computed(() => {
 
 const subtotal = computed(() => {
   if (!props.order?.items) return 0
-  
+
   return props.order.items.reduce((total, item) => {
     if (item.is_void || item.is_void === 1 || item.is_void === '1') {
       return total
     }
-    
+
     // Calculate item total including add-ons
     const itemTotal = parseFloat(item.total_price || 0)
     const addonsTotal = item.addons ? item.addons.reduce((addonSum, addon) => {
       return addonSum + parseFloat(addon.total_price || 0)
     }, 0) : 0
-    
+
     return total + itemTotal + addonsTotal
   }, 0)
 })
@@ -599,7 +597,7 @@ const discount = computed(() =>
 )
 
 const localTaxAmount = computed(() =>
-  Math.round(subtotal.value * (serviceChargeRate.value / 100) * 100) / 100
+  Math.round(subtotal.value * (localTaxRate.value / 100) * 100) / 100
 )
 
 const localTotal = computed(() =>
@@ -770,8 +768,9 @@ function printReceipt() {
 }
 
 onMounted(() => {
-  localTaxRate.value = parseFloat(props.order?.tax_rate ?? 10)
-  
+  // Initialize localTaxRate from order's service_charge_rate
+  localTaxRate.value = parseFloat(props.order?.service_charge_rate ?? 0)
+
   // Add ENTER key listener for new order after payment
   const handleEnterKey = (e) => {
     if (e.key === 'Enter' && paid.value) {
@@ -779,7 +778,7 @@ onMounted(() => {
     }
   }
   document.addEventListener('keydown', handleEnterKey)
-  
+
   // Store handler for cleanup
   window._paymentModalEnterHandler = handleEnterKey
 })

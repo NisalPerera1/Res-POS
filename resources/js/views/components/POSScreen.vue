@@ -137,6 +137,19 @@
           <button class="refresh-btn" @click="refreshOrder">🔄</button>
         </div>
 
+        <!-- Customer Name Input -->
+        <div class="customer-section">
+          <div class="customer-label">👤 Customer Name</div>
+          <input
+            v-model="customerName"
+            @blur="updateCustomerName"
+            @keydown.enter="updateCustomerName"
+            type="text"
+            placeholder="Enter customer name..."
+            class="customer-input"
+          />
+        </div>
+
         <!-- Cart Items — scrollable -->
         <div class="cart-scroll">
 
@@ -290,6 +303,19 @@
             </div>
           </div>
           <button class="refresh-btn" @click="refreshOrder">🔄</button>
+        </div>
+
+        <!-- Customer Name Input (Mobile) -->
+        <div class="customer-section">
+          <div class="customer-label">👤 Customer Name</div>
+          <input
+            v-model="customerName"
+            @blur="updateCustomerName"
+            @keydown.enter="updateCustomerName"
+            type="text"
+            placeholder="Enter customer name..."
+            class="customer-input"
+          />
         </div>
 
         <!-- Cart Items — scrollable -->
@@ -533,6 +559,7 @@ const searchQuery  = ref('')
 const modifierItem = ref(null)
 const addonsItem   = ref(null)
 const mobileView   = ref('menu')
+const customerName = ref('')
 
 const currentOrder = computed(() => orderStore.currentOrder)
 const currentItems = computed(() => {
@@ -742,6 +769,18 @@ async function refreshOrder() {
   }
 }
 
+async function updateCustomerName() {
+  if (!currentOrder.value?.id) return
+  try {
+    await axios.patch(`/orders/${currentOrder.value.id}/customer`, {
+      customer_name: customerName.value || 'Walk-in',
+    })
+    showToast('Customer name updated', 'success')
+  } catch (e) {
+    showToast('Failed to update customer name', 'error')
+  }
+}
+
 function openNotes(item) { notesItem.value = item; notesText.value = item.notes ?? '' }
 
 async function saveNotes() {
@@ -847,6 +886,13 @@ watch(() => route.params.tableId, async (newTableId, oldTableId) => {
   }
 }, { immediate: false })
 
+// Watch for order changes to sync customer name
+watch(() => currentOrder.value?.customer_name, (newName) => {
+  if (newName !== undefined && newName !== customerName.value) {
+    customerName.value = newName
+  }
+}, { immediate: true })
+
 onMounted(async () => {
   await initializeTableAndOrder()
 })
@@ -883,6 +929,43 @@ div::-webkit-scrollbar { display: none; }
   gap: 8px;
   /* capture its rendered height via a CSS variable for mobile cart offset */
   --topbar-h: 61px;
+}
+
+/* ── Customer Section ── */
+.customer-section {
+  padding: 10px 12px;
+  border-bottom: 1px solid #252B38;
+  background: #12151C;
+  flex-shrink: 0;
+}
+
+.customer-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748B;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.customer-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: #1A1E28;
+  border: 1px solid #252B38;
+  border-radius: 6px;
+  color: #F1F5F9;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.customer-input:focus {
+  border-color: #F59E0B;
+}
+
+.customer-input::placeholder {
+  color: #64748B;
 }
 
 .back-btn {
@@ -1316,7 +1399,7 @@ div::-webkit-scrollbar { display: none; }
   background: #12151C;
   border-top: 1px solid #252B38;
   margin-top: auto; /* Push to bottom of flex container */
-  min-height: 120px; /* Ensure charge button always visible */
+  min-height: 20px;
   max-height: 140px; /* Prevent taking too much space */
   position: sticky;
   bottom: 0;
@@ -1330,7 +1413,7 @@ div::-webkit-scrollbar { display: none; }
 .charge-btn {
   width: 100%; padding: 10px; border-radius: 6px; font-size: 13px;
   font-weight: 700; background: #F59E0B; color: #000; border: none;
-  cursor: pointer; min-height: 44px;
+  cursor: pointer;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
 }
 .charge-btn.disabled { opacity: 0.4; cursor: not-allowed; }
@@ -1475,7 +1558,7 @@ div::-webkit-scrollbar { display: none; }
     min-height: 100px !important;
   }
 
-  .cart-actions {
+  /* .cart-actions {
     position: fixed !important;
     bottom: 15% !important;
     left: 0 !important;
@@ -1488,7 +1571,7 @@ div::-webkit-scrollbar { display: none; }
     padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
     z-index: 50 !important;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3) !important;
-  }
+  } */
 
   .charge-btn {
     min-height: 52px !important;

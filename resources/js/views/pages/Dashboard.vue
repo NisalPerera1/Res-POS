@@ -1,61 +1,62 @@
 <template>
   <div class="dashboard-container" :class="isDarkTheme ? 'dark-theme' : 'light-theme'">
 
-    <!-- ═══ TOPBAR ═══════════════════════════════════════════════════ -->
-    <div class="topbar">
-      <div class="topbar-left">
-        <div class="page-title">{{ greeting }}<span class="title-sep">—</span>{{ todayLabel }}</div>
-        <div class="page-sub">Pambala, Madampe · Lanka Standard Time</div>
-      </div>
-      <div class="topbar-right">
-        <div class="pill">
-          <div class="pill-dot"></div>
-          {{ stats.activeStaff }} staff on shift
+    <!-- ═══ HEADER (topbar + quick actions live in one sticky unit) ══ -->
+    <header class="app-header">
+      <div class="topbar">
+        <div class="topbar-left">
+          <div class="page-title">{{ greeting }}<span class="title-sep">—</span>{{ todayLabel }}</div>
+          <div class="page-sub">Pambala, Madampe · Lanka Standard Time</div>
         </div>
-        <button class="btn-refresh" :disabled="loading" @click="refreshData">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" :class="{ spinning: loading }">
-            <path d="M11 6.5A4.5 4.5 0 1 1 9.18 2.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-            <path d="M9 1v2.5h2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          {{ loading ? 'Refreshing…' : 'Refresh' }}
-        </button>
+        <div class="topbar-right">
+          <div class="pill">
+            <div class="pill-dot"></div>
+            {{ stats.activeStaff }} staff on shift
+          </div>
+          <button class="btn-refresh" :disabled="loading" @click="refreshData">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" :class="{ spinning: loading }">
+              <path d="M11 6.5A4.5 4.5 0 1 1 9.18 2.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M9 1v2.5h2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            {{ loading ? 'Refreshing…' : 'Refresh' }}
+          </button>
+        </div>
       </div>
-    </div>
 
-    <!-- ═══ QUICK ACTIONS STRIP ══════════════════════════════════════ -->
-    <div class="quick-strip">
-      <div class="qs-label">Quick Actions</div>
-      <div class="qs-actions">
-        <router-link :to="{ name: 'tables' }" class="qs-btn qs-orange">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1.5" fill="currentColor"/><rect x="9" y="2" width="5" height="5" rx="1.5" fill="currentColor"/><rect x="2" y="9" width="5" height="5" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="5" height="5" rx="1.5" fill="currentColor"/></svg>
-          Tables
-        </router-link>
-        <router-link :to="{ name: 'direct-order' }" class="qs-btn qs-blue">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 5h10M3 8h7M3 11h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          Takeaway Order
-        </router-link>
-        <router-link :to="{ name: 'kitchen' }" class="qs-btn qs-amber">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          Kitchen
-        </router-link>
-        <router-link v-if="auth.isAdmin" :to="{ name: 'menu' }" class="qs-btn qs-green">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Menu
-        </router-link>
-        <router-link v-if="auth.isAdmin" :to="{ name: 'reports' }" class="qs-btn qs-purple">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="2" y="10" width="2.5" height="4" rx="1" fill="currentColor"/><rect x="6.75" y="6" width="2.5" height="8" rx="1" fill="currentColor"/><rect x="11.5" y="2" width="2.5" height="12" rx="1" fill="currentColor"/></svg>
-          Reports
-        </router-link>
-        <router-link v-if="auth.isAdmin" :to="{ name: 'staff' }" class="qs-btn qs-muted">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3 13c0-2.761 2.239-4 5-4s5 1.239 5 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          Staff
-        </router-link>
-        <button @click="openWebsite" class="qs-btn qs-website">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 9h10M3 12h7M6 3v10M8 1l7 7-7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Website
-        </button>
+      <div class="quick-strip">
+        <div class="qs-label">Quick Actions</div>
+        <div class="qs-actions">
+          <router-link :to="{ name: 'tables' }" class="qs-btn">
+            <svg class="qs-icon qs-icon-orange" width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1.5" fill="currentColor"/><rect x="9" y="2" width="5" height="5" rx="1.5" fill="currentColor"/><rect x="2" y="9" width="5" height="5" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="5" height="5" rx="1.5" fill="currentColor"/></svg>
+            Tables
+          </router-link>
+          <router-link :to="{ name: 'direct-order' }" class="qs-btn">
+            <svg class="qs-icon qs-icon-blue" width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 5h10M3 8h7M3 11h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            Takeaway Order
+          </router-link>
+          <router-link :to="{ name: 'kitchen' }" class="qs-btn">
+            <svg class="qs-icon qs-icon-amber" width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            Kitchen
+          </router-link>
+          <router-link v-if="auth.isAdmin" :to="{ name: 'menu' }" class="qs-btn">
+            <svg class="qs-icon qs-icon-green" width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Menu
+          </router-link>
+          <router-link v-if="auth.isAdmin" :to="{ name: 'reports' }" class="qs-btn">
+            <svg class="qs-icon qs-icon-purple" width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="2" y="10" width="2.5" height="4" rx="1" fill="currentColor"/><rect x="6.75" y="6" width="2.5" height="8" rx="1" fill="currentColor"/><rect x="11.5" y="2" width="2.5" height="12" rx="1" fill="currentColor"/></svg>
+            Reports
+          </router-link>
+          <router-link v-if="auth.isAdmin" :to="{ name: 'staff' }" class="qs-btn">
+            <svg class="qs-icon qs-icon-muted" width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3 13c0-2.761 2.239-4 5-4s5 1.239 5 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            Staff
+          </router-link>
+          <button @click="openWebsite" class="qs-btn">
+            <svg class="qs-icon qs-icon-muted" width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 9h10M3 12h7M6 3v10M8 1l7 7-7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Website
+          </button>
+        </div>
       </div>
-    </div>
+    </header>
 
     <div class="content">
 
@@ -580,6 +581,7 @@ watch(() => route.name, (newRoute) => {
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
+  padding-top: 20px;
 }
 
 .dashboard-container.light-theme {
@@ -607,29 +609,39 @@ watch(() => route.name, (newRoute) => {
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ═══ HEADER ═════════════════════════════════════════════════════════════════
+   Topbar + quick actions are one sticky unit sharing a single border and a
+   single shadow, so there's no doubled seam and no hardcoded offset between
+   the two rows. */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg2);
+  border-bottom: 1.5px solid var(--border);
+}
+.light-theme .app-header {
+  background: #FDFAF6;
+  box-shadow: 0 1px 3px rgba(100, 80, 60, 0.06);
+}
+
 /* ═══ TOPBAR ═════════════════════════════════════════════════════════════════ */
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
-  border-bottom: 1.5px solid var(--border);
-  background: var(--bg2);
-  position: sticky;
-  top: 0;
-  z-index: 20;
+  padding: 20px 28px;
   gap: 12px;
 }
-.light-theme .topbar { box-shadow: 0 1px 3px rgba(100,80,60,0.08); }
 
-.page-title  { font-size: 15px; font-weight: 600; letter-spacing: -0.02em; color: var(--text); }
-.title-sep   { color: var(--text3); margin: 0 6px; font-weight: 300; }
-.page-sub    { font-size: 11px; color: var(--text3); margin-top: 2px; }
-.topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.page-title  { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+.title-sep   { color: var(--text3); margin: 0 8px; font-weight: 300; }
+.page-sub    { font-size: 11.5px; color: var(--text3); margin-top: 3px; letter-spacing: 0.01em; }
+.topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 
 .pill {
   display: flex; align-items: center; gap: 6px;
-  padding: 5px 11px;
+  padding: 6px 12px;
   background: var(--greenbg);
   border: 1.5px solid rgba(34,197,94,0.2);
   border-radius: 999px;
@@ -641,7 +653,7 @@ watch(() => route.name, (newRoute) => {
 
 .btn-refresh {
   display: flex; align-items: center; gap: 6px;
-  padding: 7px 14px;
+  padding: 8px 15px;
   background: var(--accent); border: none; border-radius: 8px;
   font-size: 12px; font-weight: 600; color: #fff; cursor: pointer;
   font-family: inherit; transition: 0.15s; white-space: nowrap;
@@ -652,23 +664,22 @@ watch(() => route.name, (newRoute) => {
 .spinning { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ═══ QUICK ACTIONS STRIP ════════════════════════════════════════════════════ */
+/* ═══ QUICK ACTIONS STRIP ════════════════════════════════════════════════════
+   Neutral pill buttons with a single consistent border/background treatment;
+   color is reserved for the icon glyph only, so the row scans as one cohesive
+   toolbar instead of a strip of six different-colored badges. */
 .quick-strip {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 11px 24px;
-  background: var(--bg2);
-  border-bottom: 1.5px solid var(--border);
-  position: sticky;
-  top: 57px;
-  z-index: 19;
+  padding: 10px 28px;
+  border-top: 1px solid var(--border);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 .quick-strip::-webkit-scrollbar { display: none; }
-.light-theme .quick-strip { background: #FDFAF6; border-color: #EDE5D8; box-shadow: 0 1px 2px rgba(100,80,60,0.05); }
+.light-theme .quick-strip { border-color: #EDE5D8; }
 
 .qs-label {
   font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
@@ -679,30 +690,29 @@ watch(() => route.name, (newRoute) => {
 .qs-actions { display: flex; gap: 7px; flex-wrap: nowrap; }
 
 .qs-btn {
-  display: inline-flex; align-items: center; gap: 6px;
+  display: inline-flex; align-items: center; gap: 7px;
   padding: 7px 13px;
   border-radius: 8px;
   font-size: 12px; font-weight: 600;
   text-decoration: none; white-space: nowrap;
-  border: 1.5px solid transparent;
-  transition: 0.15s; cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  transition: 0.15s ease;
+  cursor: pointer;
   font-family: inherit;
   min-height: 34px;
 }
-.qs-orange { background: var(--accentbg); color: var(--accent); border-color: rgba(216,90,48,0.2); }
-.qs-orange:hover { background: rgba(216,90,48,0.18); border-color: var(--accent); }
-.qs-blue   { background: var(--bluebg);   color: var(--blue);   border-color: rgba(59,130,246,0.2); }
-.qs-blue:hover   { background: rgba(59,130,246,0.18);  border-color: var(--blue); }
-.qs-amber  { background: var(--amberbg);  color: var(--amber);  border-color: rgba(245,158,11,0.2); }
-.qs-amber:hover  { background: rgba(245,158,11,0.18);  border-color: var(--amber); }
-.qs-green  { background: var(--greenbg);  color: var(--green);  border-color: rgba(34,197,94,0.2); }
-.qs-green:hover  { background: rgba(34,197,94,0.18);   border-color: var(--green); }
-.qs-purple { background: var(--purplebg); color: var(--purple); border-color: rgba(167,139,250,0.2); }
-.qs-purple:hover { background: rgba(167,139,250,0.18); border-color: var(--purple); }
-.qs-muted  { background: var(--bg4); color: var(--text2); border-color: var(--border2); }
-.qs-muted:hover  { background: var(--bg3); color: var(--text); }
-.qs-website { background: var(--bg4); color: var(--text2); border-color: var(--border2); }
-.qs-website:hover { background: var(--bg3); color: var(--text); }
+.light-theme .qs-btn { background: #FBF7F1; }
+.qs-btn:hover { background: var(--bg3); border-color: var(--border2); color: var(--text); }
+.qs-btn svg { flex-shrink: 0; }
+
+.qs-icon-orange { color: var(--accent); }
+.qs-icon-blue   { color: var(--blue); }
+.qs-icon-amber  { color: var(--amber); }
+.qs-icon-green  { color: var(--green); }
+.qs-icon-purple { color: var(--purple); }
+.qs-icon-muted  { color: var(--text3); }
 
 /* ═══ CONTENT ════════════════════════════════════════════════════════════════ */
 .content {
@@ -941,7 +951,7 @@ watch(() => route.name, (newRoute) => {
   .page-sub   { font-size: 10.5px; }
 
   /* Quick strip: hide label, scroll horizontally */
-  .quick-strip { padding: 9px 16px; top: auto; position: relative; }
+  .quick-strip { padding: 9px 16px; }
   .qs-label    { display: none; }
   .qs-actions  { gap: 6px; }
   .qs-btn      { padding: 8px 12px; font-size: 12px; min-height: 38px; }

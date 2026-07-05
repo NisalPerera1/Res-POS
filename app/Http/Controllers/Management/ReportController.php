@@ -269,6 +269,7 @@ class ReportController extends Controller
             'method'   => 'nullable|in:cash,card,mobile,voucher,complimentary',
             'table_id' => 'nullable|integer|exists:tables,id',
             'status'   => 'nullable|in:paid,partial,pending',
+            'search'   => 'nullable|string|max:100',
         ]);
 
         $limit = $request->get('limit', 50);
@@ -302,6 +303,15 @@ class ReportController extends Controller
 
         if ($request->status) {
             $query->whereHas('order', fn($q) => $q->where('payment_status', $request->status));
+        }
+
+        // Search by order number or customer name
+        if ($request->search) {
+            $searchTerm = $request->search;
+            $query->whereHas('order', fn($q) => $q->where(function($query) use ($searchTerm) {
+                $query->where('order_number', 'like', "%{$searchTerm}%")
+                      ->orWhere('customer_name', 'like', "%{$searchTerm}%");
+            }));
         }
 
         // Get transactions with pagination
