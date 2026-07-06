@@ -102,12 +102,21 @@
               @touchcancel="e => { e.currentTarget.style.opacity='1' }"
             >
               <!-- Image -->
-              <div
-                v-if="item.image"
-                class="menu-item-img"
-                :style="{ backgroundImage: 'url(/storage/menu_items/' + item.image + ')' }"
-              />
-              <div v-else class="menu-item-img menu-item-placeholder">🍽️</div>
+              <div class="menu-item-img">
+                <img
+                  v-if="item.image"
+                  :src="getImageUrl(item.image)"
+                  :alt="item.name"
+                  style="width:100%; height:100%; object-fit:cover; border-radius:7px;"
+                  @error="e => e.target.style.display='none'"
+                />
+                <div v-else
+                  class="menu-item-placeholder"
+                  style="width:100%; height:100%; display:flex; align-items:center;
+                         justify-content:center; font-size:22px; color:#64748B;">
+                  🍽️
+                </div>
+              </div>
 
               <!-- Cart badge -->
               <span v-if="itemCartCount(item) > 0" class="item-badge">
@@ -833,6 +842,16 @@ function showToast(message, type = 'success') {
   setTimeout(() => { toast.value.show = false }, 3000)
 }
 
+// ── Image URL helper ───────────────────────────────────────
+// Handles both full URLs and bare filenames
+function getImageUrl(image) {
+  if (!image) return ''
+  if (image.startsWith('http://') || image.startsWith('https://') || image.startsWith('/')) {
+    return image
+  }
+  return `/storage/menu_items/${image}`
+}
+
 // Function to initialize table and order
 async function initializeTableAndOrder() {
   const tableId = parseInt(route.params.tableId)
@@ -1072,8 +1091,7 @@ div::-webkit-scrollbar { display: none; }
 
 .menu-item-img {
   width: 100%; aspect-ratio: 4/3; border-radius: 7px; margin-bottom: 5px;
-  background-size: cover; background-position: center;
-  background-repeat: no-repeat; background-color: #252B38;
+  background-color: #252B38; overflow: hidden;
 }
 .menu-item-placeholder {
   display: flex; align-items: center; justify-content: center;
